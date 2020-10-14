@@ -1,0 +1,1 @@
+/usr/bin/c++    -rdynamic CMakeFiles/SensorsNetwork.dir/parser.cpp.o CMakeFiles/SensorsNetwork.dir/main.cpp.o  -o SensorsNetwork 
