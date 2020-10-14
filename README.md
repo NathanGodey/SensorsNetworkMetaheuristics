@@ -1,7 +1,4 @@
 # SensorsNetworkMetaheuristics
 A project for Metaheuristics class at MPRO.
 
-To compile & run, type these commands on CLI:
-- $ cmake . $
-- $ make $
-- $ ./SensorsNetwork $
+To compile & run, type  ```bash run.sh ``` on CLI.
