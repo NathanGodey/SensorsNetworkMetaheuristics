@@ -3,3 +3,6 @@ Makefile
 SensorsNetwork
 *.cmake
 CMakeFiles
+*.tcsh
+*.txt
+venv

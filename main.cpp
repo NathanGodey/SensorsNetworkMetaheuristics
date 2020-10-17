@@ -6,10 +6,19 @@
 
 using namespace std;
 
+void writeToTxt(vector<Target> targets){
+	ofstream myfile;
+  myfile.open("result.txt");
+	for (int i=0; i<targets.size(); i++) {
+		myfile <<targets[i].x <<' ' <<targets[i].y <<' '<< targets[i].isWell << endl;
+	}
+	myfile.close();
+}
+
 int main(){
 	vector<Target> targets;
 	Parser *parser = new Parser("./instances/captANOR150_7_4.dat", targets);
-	cout <<"The well is at : " <<targets[0].x <<" " <<targets[0].y <<endl;
-	cout <<"There are " <<(targets.size()-1) <<" targets" <<endl;
+	writeToTxt(targets);
+	system("python visualizer.py");
   return 0;
 }
