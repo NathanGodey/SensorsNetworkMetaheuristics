@@ -4,5 +4,5 @@ SensorsNetwork
 *.cmake
 CMakeFiles
 *.tcsh
-*.txt
+result.txt
 venv
