@@ -1,4 +1,8 @@
 #include "sparse.h"
+#include <iostream>
+#include <string>
+
+using namespace std;
 
 sparse_matrix::sparse_matrix(vector<Target> targets, double R)
 {
@@ -14,36 +18,42 @@ sparse_matrix::sparse_matrix(vector<Target> targets, double R)
     }
 }
 
-sparse_matrix sparse_matrix::copy(){
+sparse_matrix::sparse_matrix(const sparse_matrix &M){
     // copy the matrix
 }
 
 void sparse_matrix::add_edge(int a, int b){
     if (a<n and b<n){
-        if (mat[a].count(b)==0){
-            mat[a].insert(b);
-        }
+        mat[a].insert(b);
+        mat[b].insert(a);
     }
 }
 
 void sparse_matrix::delete_edge(int a, int b){
     if (a<n and b<n){
-        if (mat[a].count(b)==1){
-            mat[a].insert(b);
+        mat[a].erase(b);
+        mat[b].erase(a);
+    }
+}
+
+void sparse_matrix::display(){
+    for (int i = 0; i<n; i++){
+        if (mat[i].size()>0) {
+            cout <<i <<"   ( ";
+            for (const auto& elem: mat[i]) {
+                cout <<elem <<" ";
+            }
+            cout <<" )" <<endl;
         }
     }
 }
 
 void sparse_vector::add_point(int point){
-    if (vect->count(point)==0) {
-        vect->insert(point);
-    }
+    vect->insert(point);
 }
 
 void sparse_vector::delete_point(int point){
-    if (vect->count(point)==1) {
-        vect->erase(point);
-    }
+    vect->erase(point);
 }
 
 sparse_matrix create_tree(sparse_matrix M, sparse_vector vect){
