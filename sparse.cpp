@@ -79,16 +79,16 @@ const unordered_set<int> intersection(unordered_set<int> a, unordered_set<int> b
     return c;
 }
 
-void sparse_matrix::fill_as_communication_graph(sparse_matrix &M_comm, sparse_vector &vect){
-    for (auto itr = vect.vect->begin(); itr != vect.vect->end(); ++itr) {
-        mat[*itr] = intersection(M_comm.mat[*itr], *vect.vect);
+void sparse_matrix::fill_as_communication_graph(sparse_matrix &M_comm, sparse_vector *vect){
+    for (auto itr = vect->vect->begin(); itr != vect->vect->end(); ++itr) {
+        mat[*itr] = intersection(M_comm.mat[*itr], *vect->vect);
     }
 }
 
-void sparse_matrix::fill_as_captation_graph(sparse_matrix &M_capt, sparse_vector &vect){
+void sparse_matrix::fill_as_captation_graph(sparse_matrix &M_capt, sparse_vector *vect){
     for (int i=0; i<M_capt.n; i++) {
-        mat[i] = intersection(M_capt.mat[i], *vect.vect);
-        if (vect.vect->find(i)!=vect.vect->end()) {
+        mat[i] = intersection(M_capt.mat[i], *vect->vect);
+        if (vect->vect->find(i)!=vect->vect->end()) {
             mat[i].insert(i);
         }
     }
@@ -108,7 +108,7 @@ bool check_modification(sparse_matrix M_capt, sparse_matrix M_comm, sparse_vecto
     // then we check that there exists way for each captor to transmit to the well
 }
 
-bool is_eligible(sparse_vector &vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt) {
+bool is_eligible(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt) {
     sparse_matrix M_comm_activated(M_comm.n);
 
     M_comm_activated.fill_as_communication_graph(M_comm, vect);
@@ -127,17 +127,17 @@ bool is_eligible(sparse_vector &vect, int k, sparse_matrix &M_comm, sparse_matri
         queue.erase(queue.begin());
     }
     if (visited.size()<M_comm.n){
-        vect.isEligible = false;
+        vect->isEligible = false;
         return false;
     }
     sparse_matrix M_capt_activated(M_comm.n);
     M_capt_activated.fill_as_captation_graph(M_capt, vect);
     for (int i=1; i<M_capt.n; i++) {
         if (M_capt.mat[i].size()<k) {
-            vect.isEligible = false;
+            vect->isEligible = false;
             return false;
         }
     }
-    vect.isEligible = true;
+    vect->isEligible = true;
     return true;
 };

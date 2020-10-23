@@ -28,11 +28,11 @@ public:
     ~sparse_matrix(){mat.clear();}
     void add_edge(int a, int b);
     void delete_edge(int a, int b);
-    void fill_as_communication_graph(sparse_matrix &M_comm, sparse_vector &vect);
-    void fill_as_captation_graph(sparse_matrix &M_capt, sparse_vector &vect);
+    void fill_as_communication_graph(sparse_matrix &M_comm, sparse_vector *vect);
+    void fill_as_captation_graph(sparse_matrix &M_capt, sparse_vector *vect);
     void display();
 };
 
-bool is_eligible(sparse_vector &vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt);
+bool is_eligible(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt);
 void create_communication_tree(sparse_matrix &M_result, sparse_matrix M_comm, sparse_vector vect);
 bool check_modification(sparse_matrix M_capt, sparse_matrix M_comm, sparse_vector vect_init, sparse_vector vect_fin);
