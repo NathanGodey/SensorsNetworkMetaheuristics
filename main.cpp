@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "target.h"
+#include "sparse.h"
 #include <vector>
 #include <iostream>
 #include <string>
