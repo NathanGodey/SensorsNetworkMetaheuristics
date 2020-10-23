@@ -33,6 +33,16 @@ public:
     void display();
 };
 
+class modification
+{
+public:
+    unordered_set<int>* deleted_captor;
+    unordered_set<int>* added_captor;
+    modification(sparse_vector *vect, int nb_del, int nb_add, int &total_targets);
+    modification(unordered_set<int> del_point, unordered_set<int> add_point);
+    ~modification(){delete[] deleted_captor; delete[] added_captor;}
+    bool check_modif(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt);
+    sparse_vector apply_modification(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt);
+};
+
 bool is_eligible(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt);
-void create_communication_tree(sparse_matrix &M_result, sparse_matrix M_comm, sparse_vector vect);
-bool check_modification(sparse_matrix M_capt, sparse_matrix M_comm, sparse_vector vect_init, sparse_vector vect_fin);
