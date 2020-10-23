@@ -110,25 +110,26 @@ bool check_modification(sparse_matrix M_capt, sparse_matrix M_comm, sparse_vecto
 
 bool is_eligible(sparse_vector &vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt) {
     sparse_matrix M_comm_activated(M_comm.n);
+
     M_comm_activated.fill_as_communication_graph(M_comm, vect);
-    unordered_set<int> visited = {0}, current;
+    M_comm_activated.display();
+    unordered_set<int> visited, current;
     vector<int> queue;
     queue.push_back(0);
-    while (!queue.empty()) {
+    while (queue.size()>0) {
         current = M_comm_activated.mat[*queue.begin()];
         for (auto itr = current.begin(); itr != current.end(); ++itr) {
             if (visited.find(*itr) == visited.end()) {
                 queue.push_back(*itr);
             }
         }
-        visited.insert(*queue.begin());
+        visited.insert(queue[0]);
         queue.erase(queue.begin());
     }
     if (visited.size()<M_comm.n){
         vect.isEligible = false;
         return false;
     }
-
     sparse_matrix M_capt_activated(M_comm.n);
     M_capt_activated.fill_as_captation_graph(M_capt, vect);
     for (int i=1; i<M_capt.n; i++) {
