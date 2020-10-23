@@ -112,12 +112,7 @@ bool is_eligible(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matri
     sparse_matrix M_comm_activated(M_comm.n);
 
     M_comm_activated.fill_as_communication_graph(M_comm, vect);
-    M_comm_activated.display();
-<<<<<<< HEAD
     unordered_set<int> visited = {0}, current;
-=======
-    unordered_set<int> visited, current;
->>>>>>> 641134611c06b49d2d76b61d54a233ac392f186d
     vector<int> queue;
     queue.push_back(0);
     while (queue.size()>0) {
@@ -125,15 +120,9 @@ bool is_eligible(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matri
         for (auto itr = current.begin(); itr != current.end(); ++itr) {
             if (visited.find(*itr) == visited.end()) {
                 queue.push_back(*itr);
-<<<<<<< HEAD
                 visited.insert(*itr);
             }
         }
-=======
-            }
-        }
-        visited.insert(queue[0]);
->>>>>>> 641134611c06b49d2d76b61d54a233ac392f186d
         queue.erase(queue.begin());
     }
     if (visited.size()<M_comm.n){
