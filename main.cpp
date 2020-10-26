@@ -11,7 +11,12 @@ void writeToTxt(vector<Target> targets){
 	ofstream myfile;
   myfile.open("result.txt");
 	for (int i=0; i<targets.size(); i++) {
-		myfile <<targets[i].x <<' ' <<targets[i].y <<' '<< targets[i].isWell << endl;
+		string neighbours_str = "";
+		for (auto itr = targets[i].neighbours.begin(); itr!=targets[i].neighbours.end(); itr++) {
+				neighbours_str = neighbours_str + to_string(*itr) + ',';
+		}
+		neighbours_str = "["+neighbours_str.substr(0,neighbours_str.length()-1)+']';
+		myfile <<targets[i].x <<' ' <<targets[i].y <<' '<< targets[i].isSensor <<' '<<neighbours_str << endl;
 	}
 	myfile.close();
 }
@@ -20,21 +25,18 @@ int main(){
 	vector<Target> targets;
 	Parser *parser = new Parser("./instances/captANOR1500_18_100.dat", targets);
 	MinorantsParser *mino_parser = new MinorantsParser("captANOR1500_18_100.dat");
-	int K = 1, R_COMM = 1, R_CAPT = 1;
+	int K = 1, R_COMM = 3, R_CAPT = 1;
 
 	cout <<"Un minorant pour ce problème est : " <<mino_parser->getMinorant(K, R_COMM, R_CAPT);
 
 	sparse_matrix M_comm(targets, R_COMM);
 	sparse_matrix M_capt(targets, R_CAPT);
 
-	unordered_set<int> a = {};
-	for (int i=0; i<targets.size(); i++){
-			a.insert(i);
-	}
+	unordered_set<int> a = {24,52,36,58,2,14,25,62,10,0,76};
 	sparse_vector* v = new sparse_vector(a);
 	sparse_matrix Com_graph(targets.size());
 	Com_graph.fill_as_communication_graph(M_comm, v);
-	//Com_graph.display();
+	Com_graph.display();
 
 	sparse_matrix Capt_graph(targets.size());
 	Capt_graph.fill_as_captation_graph(M_capt, v);
@@ -47,6 +49,9 @@ int main(){
 	} else {
 			cout <<endl <<"ce vecteur n'est pas éligible" <<endl;
 	}
+
+	setSensorsFromVect(targets, *v);
+	setNeighboorsFromCommunicationGraph(targets, Com_graph);
 
 	writeToTxt(targets);
 	system("python visualizer.py");
