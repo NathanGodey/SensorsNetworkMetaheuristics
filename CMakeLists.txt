@@ -6,5 +6,5 @@ list(APPEND CMAKE_SYSTEM_FRAMEWORK_PATH /Library/Frameworks) #Mac, why not auto?
 find_package(Imagine REQUIRED)
 
 project(SensorsNetwork)
-add_executable(SensorsNetwork parser.cpp parser.h sparse.cpp sparse.h main.cpp target.h)
+add_executable(SensorsNetwork parser.cpp parser.h sparse.cpp sparse.h main.cpp target.h target.cpp greedy.h greedy.cpp)
 ImagineUseModules(SensorsNetwork Graphics)

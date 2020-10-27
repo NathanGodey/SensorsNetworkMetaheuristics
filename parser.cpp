@@ -23,14 +23,15 @@ vector<string> split(string line, string delimiter){
 }
 
 Parser::Parser(string instanceFile, vector<Target>& targets){
-    ifstream inFile(instanceFile);
-    string line;
-    string delimiter = " ";
-    while (getline(inFile, line)) {
-        vector<string> parts=split(line,delimiter);
-        targets.push_back(Target(stod(parts[3]), stod(parts[4]), stoi(parts[1])==0));
-    }
-    inFile.close();
+	ifstream inFile(instanceFile);
+	string line;
+	int count = 0;
+	while (getline(inFile, line)) {
+			vector<string> parts=split(line,delimiter);
+			targets.push_back(Target(count, stod(parts[3]), stod(parts[4]), 0));
+			count++;
+	}
+	inFile.close();
 }
 
 MinorantsParser::MinorantsParser(string instanceFile){
