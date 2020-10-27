@@ -1,4 +1,5 @@
 #include "sparse.h"
+#include "target.h"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -18,10 +19,11 @@ sparse_matrix::sparse_matrix(int size) {
 sparse_matrix::sparse_matrix(vector<Target> targets, double R)
 {
     n = targets.size();
+    int R_squared = R * R;
     mat.resize(targets.size());
     for (int i=0; i<targets.size(); i++) {
         for (int j=i+1; j<targets.size(); j++){
-            if ((targets[i].x - targets[j].x)*(targets[i].x - targets[j].x)+(targets[i].y - targets[j].y)*(targets[i].y - targets[j].y) <= R*R) {
+            if ((targets[i].x - targets[j].x)*(targets[i].x - targets[j].x)+(targets[i].y - targets[j].y)*(targets[i].y - targets[j].y) <= R_squared) {
                 mat[i].insert(j);
                 mat[j].insert(i);
             }
@@ -309,3 +311,16 @@ bool is_eligible(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matri
     vect->isEligible = true;
     return true;
 };
+
+
+void setSensorsFromVect(vector<Target> &targets, sparse_vector &v) {
+		for (auto itr = v.vect->begin(); itr != v.vect->end(); itr++){
+				targets[*itr].isSensor = true;
+		}
+};
+
+void setNeighboorsFromCommunicationGraph(vector<Target> &targets, sparse_matrix &Com_graph){
+    for (int i=0; i<targets.size(); i++)  {
+        targets[i].neighbours = Com_graph.mat[i];
+    }
+}

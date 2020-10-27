@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <cmath>
 #include <vector>
 #include <tgmath.h>
 using namespace std;

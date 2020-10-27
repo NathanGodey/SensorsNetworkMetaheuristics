@@ -15,7 +15,7 @@ vector<int> K_={1,2,3};
 
 void writeToTxt(vector<Target> targets){
     ofstream myfile;
-  myfile.open("result.txt");
+    myfile.open("result.txt");
     for (int i=0; i<targets.size(); i++) {
         string neighbours_str = "";
         for (auto itr = targets[i].neighbours.begin(); itr!=targets[i].neighbours.end(); itr++) {
@@ -28,29 +28,38 @@ void writeToTxt(vector<Target> targets){
 }
 
 int main(){
-    for (int i=0;i<file_name.size();i++){
-        for (int j=0;j<R.size();j++){
-            for (int k=0;k<K_.size();k++){
-                vector<Target> targets;
-                string instanceFile = "captANOR" + file_name[i] + ".dat";
-                MinorantsParser *mino_parser = new MinorantsParser(instanceFile);
+	vector<Target> targets;
+	Parser *parser = new Parser("./instances/captANOR1500_18_100.dat", targets);
+	MinorantsParser *mino_parser = new MinorantsParser("captANOR1500_18_100.dat");
+	int K = 1, R_COMM = 3, R_CAPT = 1;
 
-                Parser *parser = new Parser("./instances/" + instanceFile, targets);
+	cout <<"Un minorant pour ce problème est : " <<mino_parser->getMinorant(K, R_COMM, R_CAPT);
 
-                int K =K_[k] ,  R_COMM = R[j][0], R_CAPT = R[j][1];
-                cout <<"Un minorant pour ce problème est : " << mino_parser->getMinorant(K, R_COMM, R_CAPT) << endl;
-                sparse_matrix M_comm(targets, R_COMM);
-                sparse_matrix M_capt(targets, R_CAPT);
+	sparse_matrix M_comm(targets, R_COMM);
+	sparse_matrix M_capt(targets, R_CAPT);
 
-                sparse_matrix M(targets, R_CAPT);
-                sparse_vector* captors = new sparse_vector();
-                create_solution(captors, targets,R_CAPT,K);
+	unordered_set<int> a = {24,52,36,58,2,14,25,62,10,0,76};
+	sparse_vector* v = new sparse_vector(a);
+	sparse_matrix Com_graph(targets.size());
+	Com_graph.fill_as_communication_graph(M_comm, v);
+	Com_graph.display();
 
-                cout << "instance " << file_name[i] << ", R = (" << R[j][0] << "," << R[j][1] << "), K = " << K_[k] << " is_eligible: ";
-                cout << is_eligible(captors,K,M_comm,M_capt) << " - ";
-                cout << "percentage of captors = " << double(captors->vect->size())/double(M_capt.n) << endl;
-            }
-        }
-    }
-    return 0;
+	sparse_matrix Capt_graph(targets.size());
+	Capt_graph.fill_as_captation_graph(M_capt, v);
+	//Capt_graph.display();
+
+	is_eligible(v,K,Com_graph,Capt_graph);
+
+	if (v->isEligible) {
+			cout <<endl <<"ce vecteur est éligible" <<endl;
+	} else {
+			cout <<endl <<"ce vecteur n'est pas éligible" <<endl;
+	}
+
+	setSensorsFromVect(targets, *v);
+	setNeighboorsFromCommunicationGraph(targets, Com_graph);
+
+	writeToTxt(targets);
+	system("python visualizer.py");
+  return 0;
 }

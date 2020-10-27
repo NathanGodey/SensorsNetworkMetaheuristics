@@ -26,4 +26,5 @@ nx.draw_networkx_nodes(G,nodelist = sensors,pos = pos, node_color='r', node_size
 nx.draw_networkx_nodes(G,nodelist = [0],pos=[pos[0]], node_color='b', node_size = 60, node_shape = 'v')
 
 nx.draw_networkx_edges(G, pos, width = 1.5, edge_color = 'r')
+
 plt.show()

@@ -10,7 +10,7 @@ using namespace std;
 class Target {
 public:
   double x;
-    double y;
+	double y;
   bool isSensor;
   unordered_set<int> neighbours;
   Target(double x_, double y_, bool isSensor_) {
