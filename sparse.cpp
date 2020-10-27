@@ -127,14 +127,14 @@ bool is_eligible(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matri
         }
         queue.erase(queue.begin());
     }
-    if (visited.size()<M_comm.n){
+    if (visited.size()<vect->vect->size()){
         vect->isEligible = false;
         return false;
     }
     sparse_matrix M_capt_activated(M_comm.n);
     M_capt_activated.fill_as_captation_graph(M_capt, vect);
     for (int i=1; i<M_capt.n; i++) {
-        if (M_capt.mat[i].size()<k) {
+        if (M_capt_activated.mat[i].size()<k) {
             vect->isEligible = false;
             return false;
         }
