@@ -3,17 +3,19 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 using namespace std;
+
 class Target {
 public:
   double x;
-	double y;
-  bool isWell;
+    double y;
   bool isSensor;
-  Target(double x_, double y_, bool isWell_) {
+  unordered_set<int> neighbours;
+  Target(double x_, double y_, bool isSensor_) {
     x = x_;
     y = y_;
-    isWell = isWell_;
+    isSensor = isSensor_;
   }
 };

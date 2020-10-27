@@ -21,19 +21,11 @@ sparse_matrix::sparse_matrix(vector<Target> targets, double R)
     mat.resize(targets.size());
     for (int i=0; i<targets.size(); i++) {
         for (int j=i+1; j<targets.size(); j++){
-            if ((targets[i].x - targets[j].x)*(targets[i].x - targets[j].x)+(targets[i].y - targets[j].y)*(targets[i].y - targets[j].y) <= R) {
+            if ((targets[i].x - targets[j].x)*(targets[i].x - targets[j].x)+(targets[i].y - targets[j].y)*(targets[i].y - targets[j].y) <= R*R) {
                 mat[i].insert(j);
                 mat[j].insert(i);
             }
         }
-    }
-}
-
-sparse_matrix::sparse_matrix(const sparse_matrix &M){
-    n = M.n;
-    mat.resize(n);
-    for (int i=0; i<M.n;i++){
-        mat.push_back(M.mat[i]);
     }
 }
 
@@ -149,11 +141,10 @@ modification::modification(unordered_set<int> del_point, unordered_set<int> add_
 }
 
 bool modification::check_modif(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt){
-    // we verify that the modification is applicable to the vecteur
+    // we verify that the modification is applicable to the vecteur (and we apply it)
     sparse_vector* new_vect = new sparse_vector(*vect);
     for (auto i = deleted_captor->begin(); i != deleted_captor->end(); ++i){
         if (vect->vect->find(*i) == vect->vect->end()){
-            delete new_vect;
             return false;
         }
         else {
@@ -162,7 +153,6 @@ bool modification::check_modif(sparse_vector *vect, int k, sparse_matrix &M_comm
     }
     for (auto i = added_captor->begin(); i != added_captor->end(); ++i){
         if (vect->vect->find(*i) != vect->vect->end()){
-            delete new_vect;
             return false;
         }
         else {
@@ -172,62 +162,47 @@ bool modification::check_modif(sparse_vector *vect, int k, sparse_matrix &M_comm
     sparse_matrix M_comm_activated(M_comm.n);
     M_comm_activated.fill_as_communication_graph(M_comm, new_vect);
 
-    unordered_set<int> targ,targ_captors; // targ_captors will hold the list of captors for a target
-    targ.insert(0); // targ is the list of checked target, we don't need to check for 0
-    int is_capt=0;
+    unordered_set<int> targ,targ_captors,capt; // targ_captors will hold the list of captors for a target
+    for (auto it=new_vect->vect->begin();it !=new_vect->vect->end();++it){
+        targ.insert(*it); // targ is the list of checked target, we don't need to check for captors
+    }
     if (vect->isEligible){
         // we verify that each target that was linked to deleted captors are capted by at least k captors
         for (auto i = deleted_captor->begin(); i != deleted_captor->end(); ++i){
+            targ_captors = M_capt.mat[*i];
             // the deleted captor needs to have k captors around it as well
-            if (targ.find(*i)==targ.end()){
-                targ_captors = intersection(*(*new_vect).vect,M_capt.mat[*i]);
-                if (targ_captors.size()<k){
-                    delete new_vect;
-                    return false;
-                }
-                targ.insert(*i);
-            }
-            for (auto j = M_capt.mat[*i].begin(); j != M_capt.mat[*i].end(); ++j){
-                if (targ.find(*j)==targ.end()){
-                    targ_captors = intersection(*(*new_vect).vect,M_capt.mat[*j]);
-                    if ((*new_vect).vect->find(*j) != (*new_vect).vect->end()) is_capt = 1; // if the target is a captor, we have to count it
-                    else is_capt = 0;
-                    if (targ_captors.size()+is_capt<k){
-                        delete new_vect;
+            for (auto j=targ_captors.begin(); j!=targ_captors.end();++j){
+                if (targ.find(*j) == targ.end()){
+                    capt = intersection(M_capt.mat[*j],*new_vect->vect);
+                    if (capt.size()<k){
                         return false;
                     }
-                    targ.insert(*j);
                 }
             }
         }
         // we verify that each captor that was linked to deleted captors can communitate to the well
-        // we first quickly check that no captor is isolated
+        // we first quickly check that no captor is isolated (otherwise it is going to be done with the code below)
         unordered_set<int> neighboring_captors, checked_captors;
         for (auto i = deleted_captor->begin(); i != deleted_captor->end(); ++i){
             neighboring_captors = intersection(*(*new_vect).vect,M_comm_activated.mat[*i]);
             for (auto j = neighboring_captors.begin(); j != neighboring_captors.end(); ++j){
                 if (intersection(*(*new_vect).vect,M_comm_activated.mat[*j]).size() == 0){
-                    delete new_vect;
                     return false;
                 }
             }
         }
 
     }
-    else { // we check for target
-        for (int i=1; i<M_capt.n;i++){
-            for (auto j = M_capt.mat[i].begin(); j != M_capt.mat[i].end(); ++j){
-                targ_captors = intersection(*(*new_vect).vect,M_capt.mat[*j]);
-                if ((*new_vect).vect->find(*j) != (*new_vect).vect->end()) is_capt = 1; // if the target is a captor, we have to count it
-                else is_capt = 0;
-                if (targ_captors.size()<k+is_capt){
-                    delete new_vect;
-                    return false;
-                }
+    else { // we check that every target is can be capted by k different captors
+        for (int i=1; i<M_capt.n; i++) {
+            capt = intersection(M_capt.mat[i],*new_vect->vect);
+            if (vect->vect->find(i) == vect->vect->end() and capt.size()<k) {
+                return false;
             }
         }
+
     }
-    // we look at the connexity of the graph (if vect is not eligible or if the communication graph is not trivially non-connex
+    // we look at the connexity of the graph (if vect is not eligible or if the communication graph is not trivially non-connex)
     unordered_set<int> visited = {0}, current;
     vector<int> queue;
     queue.push_back(0);
@@ -242,10 +217,8 @@ bool modification::check_modif(sparse_vector *vect, int k, sparse_matrix &M_comm
         queue.erase(queue.begin());
     }
     if (visited.size()<new_vect->vect->size()){
-        delete new_vect;
         return false;
     }
-    delete new_vect;
     return true;
 }
 
@@ -265,36 +238,44 @@ sparse_vector modification::apply_modification(sparse_vector *vect, int k, spars
     return new_vect;
 }
 
-sparse_vector create_solution(sparse_matrix M_capt, int k){
-    sparse_matrix M = sparse_matrix(M_capt);
-    sparse_vector captors = sparse_vector();
+void create_solution(sparse_vector *captors, vector<Target> targets, double R_capt, int k){
+    sparse_matrix M = sparse_matrix(targets,R_capt);
     // we will create k tree (with BFS), those trees have minimum depth
     // each time a tree is created, nodes become captors and the edges of the tree are deleted
     // if such a thing is possible, the list of captors will be admissible
-    for (int i=0; i<k; i++){
+    for (int it=0; it<k; it++){
         unordered_set<int> visited = {0}, current;
-        vector<int> queue;
+        vector<int> queue, edges_b, edges_e;
         queue.push_back(0);
         while (queue.size()>0) {
-            current = M_capt.mat[*queue.begin()];
-            for (auto itr = current.begin(); itr != current.end(); ++itr) {
+            current = M.mat[*queue.begin()];
+            for (auto itr = current.begin(); itr != current.end(); ++itr){
                 if (visited.find(*itr) == visited.end()) {
                     queue.push_back(*itr);
                     visited.insert(*itr);
-                    M.delete_edge(*itr,*queue.begin()); // in further loops, this edge wont be able to form a captation connection
-                    captors.add_point(*queue.begin()); // every node will be a captor (leaves wont be)
+                    captors->add_point(*queue.begin());
+                    edges_b.push_back(*queue.begin());
+                    edges_e.push_back(*itr);
                 }
             }
             queue.erase(queue.begin());
         }
-        if (visited.size()<M_capt.n){
-            for (int i=0; i< M_capt.n; i++){
-                captors.vect->insert(i);
+
+        for (int e=0; e<edges_e.size();e++){
+            if (captors->vect->find(edges_e[e]) == captors->vect->end()){
+                M.delete_edge(edges_b[e],edges_e[e]);
+            }
+        }
+
+        if (visited.size()<M.n){
+            for (int f=0; f<M.n;f++){
+                if (visited.find(f) == visited.end()){
+                    captors->add_point(f);
+                }
             }
         }
     }
 }
-
 
 bool is_eligible(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt) {
     sparse_matrix M_comm_activated(M_comm.n);
@@ -320,7 +301,7 @@ bool is_eligible(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matri
     sparse_matrix M_capt_activated(M_capt.n);
     M_capt_activated.fill_as_captation_graph(M_capt, vect);
     for (int i=1; i<M_capt.n; i++) {
-        if (M_capt.mat[i].size()<k) {
+        if (vect->vect->find(i) == vect->vect->end() and M_capt_activated.mat[i].size()<k) {
             vect->isEligible = false;
             return false;
         }

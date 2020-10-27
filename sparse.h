@@ -24,7 +24,6 @@ public:
     std::vector<std::unordered_set<int>> mat;
     sparse_matrix(int size);
     sparse_matrix(vector<Target> targets, double R);
-    sparse_matrix(const sparse_matrix &M);
     ~sparse_matrix(){mat.clear();}
     void add_edge(int a, int b);
     void delete_edge(int a, int b);
@@ -46,3 +45,4 @@ public:
 };
 
 bool is_eligible(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt);
+void create_solution(sparse_vector *captors, vector<Target> targets, double R_capt, int k);
