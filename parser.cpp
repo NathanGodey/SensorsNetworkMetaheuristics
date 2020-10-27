@@ -27,7 +27,7 @@ Parser::Parser(string instanceFile, vector<Target>& targets){
 	string line;
 	int count = 0;
 	while (getline(inFile, line)) {
-			vector<string> parts=split(line,delimiter);
+			vector<string> parts=split(line," ");
 			targets.push_back(Target(count, stod(parts[3]), stod(parts[4]), 0));
 			count++;
 	}

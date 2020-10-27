@@ -198,7 +198,7 @@ bool modification::check_modif(sparse_vector *vect, int k, sparse_matrix &M_comm
     else { // we check that every target is can be capted by k different captors
         for (int i=1; i<M_capt.n; i++) {
             capt = intersection(M_capt.mat[i],*new_vect->vect);
-            if (vect->vect->find(i) == vect->vect->end() and capt.size()<k) {
+            if (capt.size()<(k-(vect->vect->find(i) != vect->vect->end()))) {
                 return false;
             }
         }
@@ -303,7 +303,7 @@ bool is_eligible(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matri
     sparse_matrix M_capt_activated(M_capt.n);
     M_capt_activated.fill_as_captation_graph(M_capt, vect);
     for (int i=1; i<M_capt.n; i++) {
-        if (vect->vect->find(i) == vect->vect->end() and M_capt_activated.mat[i].size()<k) {
+        if (M_capt_activated.mat[i].size() < (k-(vect->vect->find(i) != vect->vect->end()))) {
             vect->isEligible = false;
             return false;
         }

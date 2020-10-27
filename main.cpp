@@ -23,7 +23,7 @@ void writeToTxt(vector<Target> targets){
                 neighbours_str = neighbours_str + to_string(*itr) + ',';
         }
         neighbours_str = "["+neighbours_str.substr(0,neighbours_str.length()-1)+']';
-        myfile <<targets[i].x <<' ' <<targets[i].y <<' '<< targets[i].isSensor <<' '<<neighbours_str << endl;
+        myfile <<targets[i].id<<" " <<targets[i].x <<' ' <<targets[i].y <<' '<< targets[i].isSensor <<' '<<neighbours_str << endl;
     }
     myfile.close();
 }
@@ -31,10 +31,10 @@ void writeToTxt(vector<Target> targets){
 int main(){
 	vector<Target> targets;
 	string parserPrefix = "./instances/", instancePrefix = "captANOR", extension = ".dat";
-	string instance = "150_7_4";
+	string instance = "225_8_10";
 	Parser *parser = new Parser(parserPrefix+instancePrefix+instance+extension, targets);
 	MinorantsParser *mino_parser = new MinorantsParser(instancePrefix+instance+extension);
-	int K = 3, R_COMM = 2, R_CAPT = 2;
+	int K = 1, R_COMM = 3, R_CAPT = 2;
 	int lower_bound = mino_parser->getMinorant(K, R_COMM, R_CAPT);
 	cout <<"Un minorant pour ce problème est : " <<lower_bound <<endl;
 
@@ -44,12 +44,14 @@ int main(){
 	setTargetsWeights(targets, M_capt);
 	vector<int> removal_queue = sortedTargetsIds(targets);
 
+	//TODO : remove when valentine's heuristic works
 	unordered_set<int> a;
 	for (int i=0; i<targets.size(); i++) {
 			a.insert(i);
 	}
 
 	sparse_vector* v = new sparse_vector(a);
+	//create_solution(captors, targets,R_CAPT,K);
 	greedyOptimization(v, removal_queue, K, M_comm, M_capt);
 
 	sparse_matrix Com_graph(targets.size());
