@@ -16,7 +16,7 @@ public:
     sparse_vector(){vect = new std::unordered_set<int>;}
     sparse_vector(std::unordered_set<int> &V){vect = new std::unordered_set<int>(V);}
     sparse_vector(const sparse_vector &v_original);
-    ~sparse_vector(){delete[] vect;}
+    ~sparse_vector(){vect->clear();}
     void add_point(int point);
     void delete_point(int point);
 };
@@ -45,12 +45,13 @@ public:
     modification(sparse_vector *vect, int nb_del, int nb_add, int &total_targets);
     modification(unordered_set<int> del_point, unordered_set<int> add_point);
     modification(int del_point);
-    ~modification(){delete[] deleted_captor; delete[] added_captor;}
+    ~modification(){deleted_captor->clear(); added_captor->clear();}
     bool check_modif(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt);
     sparse_vector* apply_modification(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt);
     sparse_vector* apply_modification(sparse_vector *vect);
 };
 
+const unordered_set<int> intersection(unordered_set<int> a, unordered_set<int> b);
 bool is_eligible(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt);
 void create_solution(sparse_vector *captors, vector<Target> targets, double R_capt, int k);
 void setSensorsFromVect(vector<Target> &targets, sparse_vector &v);

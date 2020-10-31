@@ -1,6 +1,7 @@
 #include "evolutionary.h"
 #include <cmath>
 #include <fstream>
+#include <algorithm>
 
 using namespace std;
 
@@ -14,13 +15,35 @@ Individual::Individual(int id, sparse_vector &elder, double avg_insertions, int 
 Individual::Individual() : sparse_vector() {
 }
 
+Individual::Individual(const Individual &ind_original) : sparse_vector(ind_original) {
+		id = ind_original.id;
+}
+
+Individual::Individual(sparse_vector& v_original) : sparse_vector(v_original){
+}
+
+Individual Individual::cross(Individual& other, int avg_gene_size, int nb_targets, int id_child){
+		int min_cut = 1+rand()%(nb_targets-1);
+		int max_cut = min_cut + int(avg_gene_size/2) + rand()%(int(avg_gene_size/2));
+		unordered_set<int> range, geneA, geneB;
+		for (int i=min_cut; i<=max_cut; i++){
+				range.insert(i);
+		}
+		geneA = intersection(range, *vect);
+		geneB = intersection(range, *(other.vect));
+		modification cross_modif(geneA, geneB);
+		Individual* child = new Individual(*cross_modif.apply_modification(&other));
+		child->id = id_child;
+		return *child;
+}
+
 Population::Population(int init_size, sparse_vector &elder, double avg_insertions, int nb_targets){
 		size = init_size;
-		individuals = new vector<Individual>(init_size);
+		individuals = new vector<Individual>;
 		Individual* current;
-		for (int i=0; i<individuals->size(); i++) {
+		for (int i=0; i<init_size; i++) {
 				current = new Individual(i, elder, avg_insertions, nb_targets);
-				(*individuals)[i] = *current;
+				individuals->push_back(*current);
 		}
 }
 
@@ -62,4 +85,20 @@ void Population::write_to_file(string file_name, vector<Target>& targets, sparse
 				file <<targets[i].id<<" " <<targets[i].x <<' ' <<targets[i].y <<' '<< targets[i].isSensor <<' '<<neighbours_str <<' '<<targets[i].weight << endl;
 		}
 		file.close();
+}
+
+
+
+void Population::cross(double reproduction_rate, int avg_gene_size, int nb_targets) {
+		int nb_cross = int(reproduction_rate*size);
+		int parent_A, parent_B;
+		for (int i=0; i<nb_cross; i++) {
+				parent_A = rand() % size;
+				parent_B = parent_A;
+				while (parent_B == parent_A) {
+						parent_B = rand() % size;
+				}
+				individuals->push_back(individuals->at(parent_A).cross(individuals->at(parent_B), nb_targets, avg_gene_size, size+i));
+		}
+		size += nb_cross;
 }

@@ -2,6 +2,9 @@
 #include "sparse.h"
 #include "greedy.h"
 #include "evolutionary.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include <vector>
 #include <algorithm>
 #include <iostream>
@@ -18,12 +21,14 @@ vector<int> K_={1,2,3};
 
 
 int main(){
+  srand (time(NULL));
+
 	vector<Target> targets;
 	string parserPrefix = "./instances/", instancePrefix = "captANOR", extension = ".dat";
 	string instance = "150_7_4";
 	Parser *parser = new Parser(parserPrefix+instancePrefix+instance+extension, targets);
 	MinorantsParser *mino_parser = new MinorantsParser(instancePrefix+instance+extension);
-	int K = 1, R_COMM = 2, R_CAPT = 1;
+	int K = 2, R_COMM = 1, R_CAPT = 1;
 	int lower_bound = mino_parser->getMinorant(K, R_COMM, R_CAPT);
 	cout <<"Un minorant pour ce problème est : " <<lower_bound <<endl;
 
@@ -49,9 +54,10 @@ int main(){
 
 	writeToTxt(targets);
 
-	system("python visualizer.py");
+	//system("python visualizer.py");
 	//displayWeights(targets);
-  Population p(10, *v, 0.05, 150);
+  Population p(100, *v, 0.05, targets.size());
+  p.cross(0.5,5, targets.size());
   //p.write_to_file("result_evol.txt", targets, M_comm);
   v = new Individual(p.individuals->at(2));
   sparse_matrix Com_graph_2(targets.size());
@@ -62,7 +68,7 @@ int main(){
   clear_all(targets);
 
 	//displayWeights(targets);
-	system("python visualizer.py");
+	//system("python visualizer.py");
 
   return 0;
 }
