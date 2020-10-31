@@ -57,18 +57,18 @@ void sparse_matrix::display(){
     }
 }
 
-
-sparse_vector::sparse_vector(sparse_vector &v_original) {
-    vect = new unordered_set<int>(*v_original.vect);
-    isEligible = v_original.isEligible;
-}
-
 void sparse_vector::add_point(int point){
     vect->insert(point);
 }
 
 void sparse_vector::delete_point(int point){
     vect->erase(point);
+}
+
+sparse_vector::sparse_vector(const sparse_vector &v_original) {
+    vect = new unordered_set<int>(*v_original.vect);
+    isEligible = v_original.isEligible;
+    fitness = v_original.fitness;
 }
 
 const unordered_set<int> intersection(unordered_set<int> a, unordered_set<int> b) {
@@ -149,15 +149,11 @@ modification::modification(unordered_set<int> del_point, unordered_set<int> add_
 }
 
 modification::modification(int del_point) {
-    added_captor = new unordered_set<int>;
     deleted_captor = new unordered_set<int>;
-    deleted_captor->insert(del_point);
+    added_captor = new unordered_set<int>;
+    if (del_point != 0) deleted_captor->insert(del_point);
 }
 
-modification::modification() {
-    added_captor = new unordered_set<int>;
-    deleted_captor = new unordered_set<int>;
-}
 
 bool modification::check_modif(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt){
     // we verify that the modification is applicable to the vecteur (and we apply it)
@@ -178,20 +174,24 @@ bool modification::check_modif(sparse_vector *vect, int k, sparse_matrix &M_comm
             (*new_vect).add_point(*i);
         }
     }
-
     sparse_matrix M_comm_activated(M_comm.n);
     M_comm_activated.fill_as_communication_graph(M_comm, new_vect);
 
-    unordered_set<int> targ_captors,capt; // targ_captors will hold the list of captors for a target
+    unordered_set<int> targ,targ_captors,capt; // targ_captors will hold the list of captors for a target
+    for (auto it=new_vect->vect->begin();it !=new_vect->vect->end();++it){
+        targ.insert(*it); // targ is the list of checked target, we don't need to check for captors
+    }
     if (vect->isEligible){
         // we verify that each target that was linked to deleted captors are capted by at least k captors
         for (auto i = deleted_captor->begin(); i != deleted_captor->end(); ++i){
             targ_captors = M_capt.mat[*i];
             // the deleted captor needs to have k captors around it as well
             for (auto j=targ_captors.begin(); j!=targ_captors.end();++j){
-                capt = intersection(M_capt.mat[*j],*new_vect->vect);
-                if (capt.size()<(k-(new_vect->vect->find(*j) != new_vect->vect->end()))){
-                    return false;
+                if (targ.find(*j) == targ.end()){
+                    capt = intersection(M_capt.mat[*j],*new_vect->vect);
+                    if (capt.size()<k){
+                        return false;
+                    }
                 }
             }
         }
@@ -208,7 +208,7 @@ bool modification::check_modif(sparse_vector *vect, int k, sparse_matrix &M_comm
         }
 
     }
-    else { // we check that every target can be capted by k different captors
+    else { // we check that every target is can be capted by k different captors
         for (int i=1; i<M_capt.n; i++) {
             capt = intersection(M_capt.mat[i],*new_vect->vect);
             if (capt.size()<(k-(vect->vect->find(i) != vect->vect->end()))) {
@@ -249,7 +249,8 @@ sparse_vector* modification::apply_modification(sparse_vector *vect, int k, spar
     return new_vect;
 }
 
-sparse_vector* modification::apply_modification(sparse_vector *vect){
+
+sparse_vector* modification::apply_modification(sparse_vector *vect) {
     sparse_vector* new_vect = new sparse_vector(*vect);
     for (auto i = deleted_captor->begin(); i != deleted_captor->end(); ++i){
         (new_vect)->delete_point(*i);
@@ -283,19 +284,9 @@ void create_solution(sparse_vector *captors, vector<Target> targets, double R_ca
             queue.erase(queue.begin());
         }
 
-        if (it == 0 and k!=1){
-            for (int e=0; e<edges_e.size();e++){
-                if (edges_b[e] !=0){
-                    M.delete_edge(edges_b[e],edges_e[e]);
-                }
-            }
-        }
-
-        if (it == 1 and k!=2){
-            for (int e=0; e<edges_e.size();e++){
-                if (edges_b[e] !=0 and captors->vect->find(edges_e[e]) == captors->vect->end()){
-                    M.delete_edge(edges_b[e],edges_e[e]);
-                }
+        for (int e=0; e<edges_e.size();e++){
+            if (captors->vect->find(edges_e[e]) == captors->vect->end()){
+                M.delete_edge(edges_b[e],edges_e[e]);
             }
         }
 

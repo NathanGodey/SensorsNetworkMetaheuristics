@@ -2,6 +2,7 @@
 #include <unordered_set>
 #include <vector>
 #include "target.h"
+#define INF (unsigned)!((int)0)
 
 using namespace std;
 
@@ -11,9 +12,10 @@ class sparse_vector
 public:
     std::unordered_set<int>* vect;
     bool isEligible;
+    double fitness = INF;
     sparse_vector(){vect = new std::unordered_set<int>;}
     sparse_vector(std::unordered_set<int> &V){vect = new std::unordered_set<int>(V);}
-    sparse_vector(sparse_vector &v_original);
+    sparse_vector(const sparse_vector &v_original);
     ~sparse_vector(){delete[] vect;}
     void add_point(int point);
     void delete_point(int point);
