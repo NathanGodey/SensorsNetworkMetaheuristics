@@ -7,6 +7,7 @@
 #include <fstream>
 #include <string>
 #include <tgmath.h>
+#include <chrono>
 
 using namespace std;
 
@@ -34,7 +35,7 @@ int main(){
 	string instance = "225_8_10";
 	Parser *parser = new Parser(parserPrefix+instancePrefix+instance+extension, targets);
 	MinorantsParser *mino_parser = new MinorantsParser(instancePrefix+instance+extension);
-	int K = 1, R_COMM = 3, R_CAPT = 2;
+	int K = 2, R_COMM = 3, R_CAPT = 2;
 	int lower_bound = mino_parser->getMinorant(K, R_COMM, R_CAPT);
 	cout <<"Un minorant pour ce problème est : " <<lower_bound <<endl;
 
@@ -52,7 +53,7 @@ int main(){
 
 	sparse_vector* v = new sparse_vector(a);
 	//create_solution(captors, targets,R_CAPT,K);
-	greedyOptimization(v, removal_queue, K, M_comm, M_capt);
+	v = greedyOptimization(v, removal_queue, K, M_comm, M_capt);
 
 	sparse_matrix Com_graph(targets.size());
 	Com_graph.fill_as_communication_graph(M_comm, v);
