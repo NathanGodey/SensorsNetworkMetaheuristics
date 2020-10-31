@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.13.0, 2020-10-27T11:41:03. -->
+<!-- Written by QtCreator 4.13.0, 2020-10-28T16:23:56. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -365,7 +365,7 @@
     <value type="bool" key="RunConfiguration.UseMultiProcess">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="bool" key="RunConfiguration.UseTerminal">false</value>
+    <value type="bool" key="RunConfiguration.UseTerminal">true</value>
     <value type="QString" key="RunConfiguration.WorkingDirectory">C:/Users/hurev/Desktop/Metaheuristics/SensorsNetworkMetaheuristics</value>
     <value type="QString" key="RunConfiguration.WorkingDirectory.default">C:/ENPC/Temp/build-SensorsNetworkMetaheuristics-Desktop_Qt_5_15_0_MinGW_32_bit-Debug</value>
    </valuemap>
