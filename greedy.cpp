@@ -6,7 +6,7 @@ using namespace std;
 void setTargetsWeights(vector<Target> &targets, sparse_matrix &M_capt) {
 		vector<double> target_interest_rating;
 		for (int i=0; i<targets.size();i++) {
-				target_interest_rating.push_back(1./(M_capt.mat[i].size()-1)*(M_capt.mat[i].size()-1));
+				target_interest_rating.push_back(1./(M_capt.mat[i].size()));
 		}
 		double summed_interest = 0;
 		for (int i=0; i<targets.size();i++) {
@@ -29,9 +29,9 @@ sparse_vector* greedyOptimization(sparse_vector *v, vector<int> &removal_queue, 
 				if (removing_point->check_modif(v, K, M_comm, M_capt) && current!=0){
 						v = removing_point->apply_modification(v);
 				}
-				cout <<'\r' <<"Sensors left : " <<v->vect->size() <<"  ";
+				cout <<'\r' <<"Sensors left : " <<v->vect->size()-1 <<"  ";
 				fflush(stdout);
 		}
-		cout <<endl <<"Greedy Optimization completed. " <<endl;
+		cout <<endl <<"Greedy Optimization completed." <<endl;
 		return v;
 }

@@ -21,9 +21,12 @@ public:
     y = y_;
     isSensor = isSensor_;
   }
+  void clear() {neighbours.clear(); isSensor=0;}
 };
 
 void displayWeights(vector<Target> &targets);
 vector<int> sortedTargetsIds(vector<Target> &targets);
 inline bool operator< (Target& l, Target& r){ return r.weight > l.weight; };
 inline bool cmpId (Target& l, Target& r){ return r.id > l.id; };
+void writeToTxt(vector<Target> targets);
+void clear_all(vector<Target> &targets);

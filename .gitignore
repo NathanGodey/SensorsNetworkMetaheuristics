@@ -5,4 +5,5 @@ SensorsNetwork
 CMakeFiles
 *.tcsh
 result.txt
+result_evol.txt
 venv
