@@ -4,6 +4,8 @@ import numpy as np
 
 G = nx.Graph()
 f = open("result.txt")
+instance_name = f.readline()[:-1]
+K, r_comm, r_capt= f.readline().split(' ')
 pos = []
 sensors = []
 targets = []
@@ -16,7 +18,11 @@ for k,line in enumerate(f):
     is_sensor = int(attributes[3])
     id = int(attributes[0])
     current_neighbours = [int(s) for s in attributes[4][1:-1].split(',') if len(s)>0]
-    weights.append(float(attributes[5][:-2]))
+    try:
+        weights.append(float(attributes[5].rstrip()))
+    except:
+        weights.append(0)
+        print(f'Wrong weight format {attributes[5].rstrip()}')
     for n in current_neighbours:
         G.add_edge(k,n)
     if is_sensor and id!=0:
@@ -39,5 +45,5 @@ nx.draw_networkx_nodes(G,nodelist = sensors,pos = pos, node_color='r', node_size
 nx.draw_networkx_nodes(G,nodelist = [0],pos=[pos[0]], node_color='b', node_size = 60, node_shape = 'v')
 
 nx.draw_networkx_edges(G, pos, width = 1.5, edge_color = 'r')
-
-plt.show()
+plt.savefig(f'./images/greedy_results/{instance_name}_{K}_{r_comm}_{r_capt}')
+#plt.show()

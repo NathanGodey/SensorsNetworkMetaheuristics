@@ -22,9 +22,11 @@ vector<int> sortedTargetsIds(vector<Target> &targets){
     return sorted_targets_ids;
 }
 
-void writeToTxt(vector<Target> targets){
+void writeToTxt(vector<Target> targets, string instance_name, int K, int R_comm, int R_capt){
     ofstream myfile;
     myfile.open("result.txt");
+    myfile << instance_name <<endl;
+    myfile <<K <<' ' << R_comm <<' ' << R_capt <<endl;
     for (int i=0; i<targets.size(); i++) {
         string neighbours_str = "";
         for (auto itr = targets[i].neighbours.begin(); itr!=targets[i].neighbours.end(); itr++) {
