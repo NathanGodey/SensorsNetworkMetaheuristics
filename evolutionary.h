@@ -15,8 +15,7 @@ public:
 };
 
 
-inline bool operator< (Individual& l, Individual& r){ return r.fitness > l.fitness; };
-inline bool cmpId_ind(Individual& l, Individual& r){ return r.id > l.id; };
+inline bool operator< (const Individual& l, const Individual& r){ return r.fitness > l.fitness; };
 
 class Population {
 public:

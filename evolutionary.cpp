@@ -22,11 +22,11 @@ Individual::Individual() : sparse_vector() {
 
 Individual::Individual(const Individual &ind_original) : sparse_vector(ind_original) {
 		id = ind_original.id;
-		fitness = ind_original.vect->size() - 1;
+		fitness = ind_original.fitness;
 }
 
 Individual::Individual(sparse_vector& v_original) : sparse_vector(v_original){
-		fitness = v_original.vect->size() - 1;
+		fitness = v_original.fitness;
 }
 
 Individual Individual::cross(Individual& other, int avg_gene_size, int nb_targets, int id_child, int K, sparse_matrix M_comm, sparse_matrix M_capt){
@@ -100,11 +100,6 @@ void Population::write_to_file(string file_name, vector<Target>& targets, sparse
 void Population::natural_select(double kill_rate){
     int N = kill_rate*size;
     sort(individuals->begin(), individuals->end());
-    vector<int> sorted_individuals_ids;
-    for (auto it = individuals->begin(); it != individuals->end(); ++it) {
-        sorted_individuals_ids.push_back(it->id);
-    }
-    sort(individuals->begin(), individuals->end(), cmpId_ind);
     for (int i=0;i<N;i++){
         individuals->pop_back();
     }
