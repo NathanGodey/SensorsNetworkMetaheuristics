@@ -22,15 +22,15 @@ void setTargetsWeights(vector<Target> &targets, sparse_matrix &M_capt) {
 sparse_vector* greedyOptimization(sparse_vector *v, vector<int> &removal_queue, int K, sparse_matrix &M_comm, sparse_matrix &M_capt) {
 		cout <<"Running Greedy Optimization..." <<endl;
 		int current;
-		modification* removing_point;
+        modification* removing_point;
 		for (int i=0; i<removal_queue.size(); i++) {
 				current = removal_queue[i];
-				removing_point = new modification(current);
+                removing_point = new modification(current);
 				if (removing_point->check_modif(v, K, M_comm, M_capt) && current!=0){
 						v = removing_point->apply_modification(v);
 				}
-				cout <<'\r' <<"Sensors left : " <<v->vect->size() <<"  ";
-				fflush(stdout);
+                cout <<'\r' <<"Sensors left : " <<v->vect->size() <<"  ";
+                fflush(stdout);
 		}
 		cout <<endl <<"Greedy Optimization completed. " <<endl;
 		return v;

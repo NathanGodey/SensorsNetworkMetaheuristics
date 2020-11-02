@@ -96,7 +96,7 @@ void sparse_matrix::fill_as_captation_graph(sparse_matrix &M_capt, sparse_vector
     }
 }
 
-modification::modification(sparse_vector *vect, int nb_deletion, int nb_add, int &total_targets){
+modification::modification(sparse_vector *vect, int nb_deletion, int nb_add, int total_targets){
     int nb_del = min(nb_deletion, int(vect->vect->size()-1)); // there needs to be at least 0
     deleted_captor = new unordered_set<int>;
     added_captor = new unordered_set<int>;
@@ -237,7 +237,7 @@ bool modification::check_modif(sparse_vector *vect, int k, sparse_matrix &M_comm
     return true;
 }
 
-void modification::penalization(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt, int k_captation, int connexity){
+void modification::penalization(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt, int& k_captation, int& connexity){
     // we verify that the modification is applicable to the vecteur (and we apply it)
     sparse_vector* new_vect = new sparse_vector(*vect);
     for (auto i = deleted_captor->begin(); i != deleted_captor->end(); ++i){
@@ -263,7 +263,7 @@ void modification::penalization(sparse_vector *vect, int k, sparse_matrix &M_com
                 capt = intersection(M_capt.mat[*j],*new_vect->vect);
                 is_important_captor = is_important_captor or capt.size()< (k-(new_vect->vect->find(*j) != new_vect->vect->end()));
             }
-            k_captation += 1 - int(is_important_captor);
+            k_captation += is_important_captor;
         }
     }
     else { // we check that every target can be capted by k different captors
@@ -282,7 +282,7 @@ void modification::penalization(sparse_vector *vect, int k, sparse_matrix &M_com
             if (was_important_captor){
                 is_important_captor = false;
             }
-            k_captation += 1 - int(is_important_captor);
+            k_captation += is_important_captor;
         }
     }
 
@@ -307,8 +307,9 @@ void modification::penalization(sparse_vector *vect, int k, sparse_matrix &M_com
         if (visited.size()<new_vect->vect->size()){
             connexity += 1;
             for (auto itr=new_vect->vect->begin();itr != new_vect->vect->end();++itr){
-                if (visited.find(*itr) != visited.end()){
+                if (visited.find(*itr) == visited.end()){
                     queue.push_back(*itr);
+                    visited.insert(*itr);
                     break;
                 }
             }
