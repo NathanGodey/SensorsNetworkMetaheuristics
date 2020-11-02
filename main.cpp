@@ -31,19 +31,22 @@ int main(){
 	int K = 2, R_COMM = 1, R_CAPT = 1;
 	int lower_bound = mino_parser->getMinorant(K, R_COMM, R_CAPT);
 	cout <<"Un minorant pour ce problème est : " <<lower_bound <<endl;
+  sparse_matrix M_comm(targets, R_COMM);
+  sparse_matrix M_capt(targets, R_CAPT);
 
-	sparse_matrix M_comm(targets, R_COMM);
-	sparse_matrix M_capt(targets, R_CAPT);
+  setTargetsWeights(targets, M_capt);
+  vector<int> removal_queue = sortedTargetsIds(targets);
+  //TODO : remove when valentine's heuristic works
+  unordered_set<int> a;
+  for (int i=0; i<targets.size(); i++) {
+          a.insert(i);
+  }
+  auto start = std::chrono::high_resolution_clock::now();
 
-	setTargetsWeights(targets, M_capt);
-	vector<int> removal_queue = sortedTargetsIds(targets);
-
-	//TODO : remove when valentine's heuristic works
-	unordered_set<int> a;
-	for (int i=0; i<targets.size(); i++) {
-			a.insert(i);
-	}
-
+  sparse_vector* v = new sparse_vector(a);
+  v = greedyOptimization(v, removal_queue, K, M_comm, M_capt);
+  int size1 = v->vect->size();
+  auto stop = std::chrono::high_resolution_clock::now();
 	sparse_vector* v = new sparse_vector(a);
 	//create_solution(captors, targets,R_CAPT,K);
 	v = greedyOptimization(v, removal_queue, K, M_comm, M_capt);
@@ -51,9 +54,6 @@ int main(){
 	Com_graph.fill_as_communication_graph(M_comm, v);
 	setSensorsFromVect(targets, *v);
 	setNeighboorsFromCommunicationGraph(targets, Com_graph);
-
-	writeToTxt(targets);
-
 	//system("python visualizer.py");
 	//displayWeights(targets);
   Population p(100, *v, 0.05, targets.size());
@@ -72,3 +72,4 @@ int main(){
 
   return 0;
 }
+
