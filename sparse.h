@@ -45,6 +45,7 @@ public:
     modification(int del_point);
     ~modification(){delete[] deleted_captor; delete[] added_captor;}
     bool check_modif(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt);
+    void penalization(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt, int k_captation, int connexity);
     sparse_vector* apply_modification(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt);
     sparse_vector* apply_modification(sparse_vector *vect);
 };
