@@ -15,7 +15,7 @@
 
 using namespace std;
 
-vector<string> file_name = {"150_7_4"};
+vector<string> file_name = {"150_7_4", "225_8_10", "625_12_100", "900_15_20", "1500_15_100", "1500_18_100"};
 vector<vector<int>> R_ = {{1,1},{2,1},{2,2},{3,2}};
 vector<int> K_={1,2,3};
 
