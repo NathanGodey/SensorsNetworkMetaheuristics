@@ -15,6 +15,7 @@ public:
     double fitness = INF;
     double lambda_capt;
     double lambda_comm;
+    void display();
     sparse_vector(){vect = new std::unordered_set<int>;}
     sparse_vector(std::unordered_set<int> &V){vect = new std::unordered_set<int>(V);}
     sparse_vector(const sparse_vector &v_original);

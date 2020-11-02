@@ -29,7 +29,8 @@ Individual::Individual(sparse_vector& v_original) : sparse_vector(v_original){
 		fitness = v_original.vect->size() - 1;
 }
 
-Individual Individual::cross(Individual& other, int avg_gene_size, int nb_targets, int id_child, int K, sparse_matrix M_comm, sparse_matrix M_capt){
+Individual Individual::cross(Individual& other, int avg_gene_size, int id_child, int K, sparse_matrix M_comm, sparse_matrix M_capt){
+		int nb_targets = M_comm.n;
 		int min_cut = 1+rand()%(nb_targets-1);
 		int max_cut = min_cut + int(avg_gene_size/2) + rand()%(int(avg_gene_size/2));
 		unordered_set<int> range, geneA, geneB;
@@ -108,7 +109,23 @@ void Population::cross(double reproduction_rate, int avg_gene_size, int K, spars
 				while (parent_B == parent_A) {
 						parent_B = rand() % size;
 				}
-				individuals->push_back(individuals->at(parent_A).cross(individuals->at(parent_B), avg_gene_size, nb_targets, size+i, K, M_comm, M_capt));
+				individuals->push_back(individuals->at(parent_A).cross(individuals->at(parent_B), avg_gene_size, size+i, K, M_comm, M_capt));
 		}
 		size += nb_cross;
+}
+
+void Population::mutate(double mutation_rate, int mutation_size, int K, sparse_matrix &M_comm, sparse_matrix &M_capt) {
+		for (int i = 0; i<size; i++) {
+				double r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+				if (r<mutation_rate) {
+						individuals->at(i).mutate(mutation_size, K, M_comm, M_capt);
+				}
+		}
+}
+
+void Individual::mutate(int mutation_size, int K, sparse_matrix &M_comm, sparse_matrix &M_capt) {
+		modification mutation_modif(this, mutation_size, mutation_size, M_comm.n);
+		sparse_vector* mutated = mutation_modif.apply_modification(this, K, M_comm, M_capt);
+		fitness = mutated->fitness;
+		vect = mutated->vect;
 }
