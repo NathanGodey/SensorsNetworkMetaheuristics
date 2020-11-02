@@ -28,5 +28,5 @@ void displayWeights(vector<Target> &targets);
 vector<int> sortedTargetsIds(vector<Target> &targets);
 inline bool operator< (Target& l, Target& r){ return r.weight > l.weight; };
 inline bool cmpId (Target& l, Target& r){ return r.id > l.id; };
-void writeToTxt(vector<Target> targets);
+void writeToTxt(vector<Target> targets, string instance_name, int K, int R_comm, int R_capt);
 void clear_all(vector<Target> &targets);
