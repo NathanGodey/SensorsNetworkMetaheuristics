@@ -13,6 +13,8 @@ public:
     std::unordered_set<int>* vect;
     bool isEligible;
     double fitness = INF;
+    double lambda_capt;
+    double lambda_comm;
     sparse_vector(){vect = new std::unordered_set<int>;}
     sparse_vector(std::unordered_set<int> &V){vect = new std::unordered_set<int>(V);}
     sparse_vector(const sparse_vector &v_original);
@@ -48,7 +50,7 @@ public:
     ~modification(){deleted_captor->clear(); added_captor->clear();}
     bool check_modif(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt);
     void penalization(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt, int& k_captation, int& connexity);
-    sparse_vector* apply_modification(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt, double lambda_capt, double lambda_connexity);
+    sparse_vector* apply_modification(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt);
     sparse_vector* apply_modification(sparse_vector *vect);
 };
 
@@ -58,6 +60,5 @@ void create_solution(sparse_vector *captors, vector<Target> targets, double R_ca
 void setSensorsFromVect(vector<Target> &targets, sparse_vector &v);
 void setNeighboorsFromCommunicationGraph(vector<Target> &targets, sparse_matrix &Com_graph);
 void create_communication_tree(sparse_matrix &M_result, sparse_matrix M_comm, sparse_vector vect);
-bool check_modification(sparse_matrix M_capt, sparse_matrix M_comm, sparse_vector vect_init, sparse_vector vect_fin);
 
 const unordered_set<int> intersection(unordered_set<int> a, unordered_set<int> b);

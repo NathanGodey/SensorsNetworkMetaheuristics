@@ -44,12 +44,8 @@ int main(){
               sparse_matrix M_capt(targets, R_CAPT);
 
               setTargetsWeights(targets, M_capt);
-              unordered_set<int> a;
-              for (int i=0; i<targets.size();i++) {
-                  a.insert(i);
-              }
-              sparse_vector* v = new sparse_vector(a);
-              //create_solution(v, targets,R_CAPT,K);
+              sparse_vector* v = new sparse_vector();
+              create_solution(v, targets,R_CAPT,K);
 
 
               vector<int> removal_queue = sortedTargetsIds(targets);
@@ -60,6 +56,10 @@ int main(){
               setSensorsFromVect(targets, *v);
               setNeighboorsFromCommunicationGraph(targets, Com_graph);
 
+              Population p(200, *v, 0.1, 1,1, targets.size());
+              p.cross(0.5, 10, K, M_comm, M_capt);
+              p.compute_metrics();
+              cout << p.avg_fitness;
               writeToTxt(targets,instance, K, R_COMM, R_CAPT);
 
               system("python visualizer.py");
@@ -71,4 +71,3 @@ int main(){
 
   return 0;
 }
-

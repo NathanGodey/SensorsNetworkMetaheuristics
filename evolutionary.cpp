@@ -6,24 +6,30 @@
 
 using namespace std;
 
-Individual::Individual(int id, sparse_vector &elder, double avg_insertions, int nb_targets) : sparse_vector(elder) {
-		int nb_insertions = floor(0.5*avg_insertions*nb_targets) + rand() % int(avg_insertions*nb_targets);
+Individual::Individual(int id, sparse_vector &elder, double avg_insertions, int nb_targets, double _lambda_capt, double _lambda_comm) : sparse_vector(elder) {
+		int nb_insertions = floor(0.5*avg_insertions*nb_targets) + rand() % max(1, int(avg_insertions*nb_targets));
 		nb_insertions = min(nb_insertions, nb_targets - int(vect->size()));
 		modification* modif = new modification(&elder, 0, nb_insertions, nb_targets);
 		vect = modif->apply_modification(&elder)->vect;
+		lambda_capt = _lambda_capt;
+		lambda_comm = _lambda_comm;
+		fitness = vect->size() - 1;
 }
 
 Individual::Individual() : sparse_vector() {
+		fitness = vect->size() - 1;
 }
 
 Individual::Individual(const Individual &ind_original) : sparse_vector(ind_original) {
 		id = ind_original.id;
+		fitness = ind_original.vect->size() - 1;
 }
 
 Individual::Individual(sparse_vector& v_original) : sparse_vector(v_original){
+		fitness = v_original.vect->size() - 1;
 }
 
-Individual Individual::cross(Individual& other, int avg_gene_size, int nb_targets, int id_child, int K, sparse_matrix M_comm, sparse_matrix M_capt, double lambda_capt, double lambda_connexity){
+Individual Individual::cross(Individual& other, int avg_gene_size, int nb_targets, int id_child, int K, sparse_matrix M_comm, sparse_matrix M_capt){
 		int min_cut = 1+rand()%(nb_targets-1);
 		int max_cut = min_cut + int(avg_gene_size/2) + rand()%(int(avg_gene_size/2));
 		unordered_set<int> range, geneA, geneB;
@@ -33,17 +39,20 @@ Individual Individual::cross(Individual& other, int avg_gene_size, int nb_target
 		geneA = intersection(range, *vect);
 		geneB = intersection(range, *(other.vect));
 		modification cross_modif(geneA, geneB);
-        Individual* child = new Individual(*cross_modif.apply_modification(&other,K,M_comm,M_capt,lambda_capt,lambda_connexity));
+    Individual* child = new Individual(*cross_modif.apply_modification(&other,K,M_comm,M_capt));
 		child->id = id_child;
 		return *child;
 }
 
-Population::Population(int init_size, sparse_vector &elder, double avg_insertions, int nb_targets){
+Population::Population(int init_size, sparse_vector &elder, double avg_insertions, double _lambda_capt, double _lambda_comm, int _nb_targets){
 		size = init_size;
+		nb_targets = _nb_targets;
+		lambda_capt = _lambda_capt;
+		lambda_comm = _lambda_comm;
 		individuals = new vector<Individual>;
 		Individual* current;
 		for (int i=0; i<init_size; i++) {
-				current = new Individual(i, elder, avg_insertions, nb_targets);
+				current = new Individual(i, elder, avg_insertions, nb_targets, _lambda_capt, _lambda_comm);
 				individuals->push_back(*current);
 		}
 }
@@ -90,7 +99,7 @@ void Population::write_to_file(string file_name, vector<Target>& targets, sparse
 
 
 
-void Population::cross(double reproduction_rate, int avg_gene_size, int nb_targets) {
+void Population::cross(double reproduction_rate, int avg_gene_size, int K, sparse_matrix &M_comm, sparse_matrix &M_capt) {
 		int nb_cross = int(reproduction_rate*size);
 		int parent_A, parent_B;
 		for (int i=0; i<nb_cross; i++) {
@@ -99,7 +108,7 @@ void Population::cross(double reproduction_rate, int avg_gene_size, int nb_targe
 				while (parent_B == parent_A) {
 						parent_B = rand() % size;
 				}
-				individuals->push_back(individuals->at(parent_A).cross(individuals->at(parent_B), nb_targets, avg_gene_size, size+i));
+				individuals->push_back(individuals->at(parent_A).cross(individuals->at(parent_B), avg_gene_size, nb_targets, size+i, K, M_comm, M_capt));
 		}
 		size += nb_cross;
 }

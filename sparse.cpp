@@ -69,6 +69,8 @@ sparse_vector::sparse_vector(const sparse_vector &v_original) {
     vect = new unordered_set<int>(*v_original.vect);
     isEligible = v_original.isEligible;
     fitness = v_original.fitness;
+    lambda_capt = v_original.lambda_capt;
+    lambda_comm = v_original.lambda_comm;
 }
 
 const unordered_set<int> intersection(unordered_set<int> a, unordered_set<int> b) {
@@ -300,7 +302,7 @@ void modification::penalization(sparse_vector *vect, int k, sparse_matrix &M_com
     }
 }
 
-sparse_vector* modification::apply_modification(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt, double lambda_capt, double lambda_connexity){
+sparse_vector* modification::apply_modification(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt){
     sparse_vector* new_vect = new sparse_vector(*vect);
 
     int k_capt = 0,connexity = 0;
@@ -313,7 +315,7 @@ sparse_vector* modification::apply_modification(sparse_vector *vect, int k, spar
         (new_vect)->add_point(*i);
     }
     new_vect->isEligible = (k_capt ==0) and (connexity==0);
-    new_vect->fitness = lambda_capt*k_capt + lambda_connexity*connexity + new_vect->vect->size() - 1;
+    new_vect->fitness = vect->lambda_capt*k_capt + vect->lambda_comm*connexity + new_vect->vect->size() - 1;
     return new_vect;
 }
 
