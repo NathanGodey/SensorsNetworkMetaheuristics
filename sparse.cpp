@@ -65,6 +65,12 @@ void sparse_vector::delete_point(int point){
     vect->erase(point);
 }
 
+void sparse_vector::display() {
+    for (auto itr = vect->begin(); itr!=vect->end(); itr++){
+        cout <<*itr <<" ";
+    }
+    cout <<endl;
+}
 sparse_vector::sparse_vector(const sparse_vector &v_original) {
     vect = new unordered_set<int>(*v_original.vect);
     isEligible = v_original.isEligible;

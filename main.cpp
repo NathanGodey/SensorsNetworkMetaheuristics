@@ -15,8 +15,8 @@
 
 using namespace std;
 
-vector<string> file_name = {"150_7_4", "225_8_10", "625_12_100", "900_15_20", "1500_15_100", "1500_18_100"};
-vector<vector<int>> R_ = {{1,1},{2,2}};
+vector<string> file_name = {"150_7_4"};
+vector<vector<int>> R_ = {{1,1}};
 vector<int> K_={1};
 
 
@@ -57,9 +57,11 @@ int main(){
               setNeighboorsFromCommunicationGraph(targets, Com_graph);
 
               Population p(200, *v, 0.1, 1,1, targets.size());
-              p.cross(0.5, 10, K, M_comm, M_capt);
-              p.compute_metrics();
-              cout << p.avg_fitness;
+              Individual ind = p.individuals->at(0);
+              // p.cross(0.5, 10, K, M_comm, M_capt);
+              // p.compute_metrics();
+              // cout << p.avg_fitness;
+              
               writeToTxt(targets,instance, K, R_COMM, R_CAPT);
 
               system("python visualizer.py");
