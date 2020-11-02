@@ -48,7 +48,7 @@ public:
     ~modification(){deleted_captor->clear(); added_captor->clear();}
     bool check_modif(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt);
     void penalization(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt, int& k_captation, int& connexity);
-    sparse_vector* apply_modification(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt);
+    sparse_vector* apply_modification(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt, double lambda_capt, double lambda_connexity);
     sparse_vector* apply_modification(sparse_vector *vect);
 };
 

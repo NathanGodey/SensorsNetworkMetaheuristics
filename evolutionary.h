@@ -11,7 +11,7 @@ public:
 		Individual(const Individual &ind_original);
 		Individual(sparse_vector& v_original);
 		Individual();
-		Individual cross(Individual& other, int avg_gene_size, int nb_targets, int id_child); // Cross-over operation
+        Individual cross(Individual& other, int avg_gene_size, int nb_targets, int id_child, int K, sparse_matrix M_comm, sparse_matrix M_capt, double lambda_capt, double lambda_connexity); // Cross-over operation
 };
 
 

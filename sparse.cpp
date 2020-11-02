@@ -159,20 +159,10 @@ bool modification::check_modif(sparse_vector *vect, int k, sparse_matrix &M_comm
     // we verify that the modification is applicable to the vecteur (and we apply it)
     sparse_vector* new_vect = new sparse_vector(*vect);
     for (auto i = deleted_captor->begin(); i != deleted_captor->end(); ++i){
-        if (vect->vect->find(*i) == vect->vect->end()){
-            return false;
-        }
-        else {
-            (*new_vect).delete_point(*i);
-        }
+        (*new_vect).delete_point(*i);
     }
     for (auto i = added_captor->begin(); i != added_captor->end(); ++i){
-        if (vect->vect->find(*i) != vect->vect->end()){
-            return false;
-        }
-        else {
-            (*new_vect).add_point(*i);
-        }
+        (*new_vect).add_point(*i);
     }
 
     sparse_matrix M_comm_activated(M_comm.n);
@@ -247,6 +237,9 @@ void modification::penalization(sparse_vector *vect, int k, sparse_matrix &M_com
 
     bool is_important_captor;
 
+    k_captation = 0;
+    connexity = 0;
+
     unordered_set<int> targ_captors,capt; // targ_captors will hold the list of captors for a target
     if (vect->isEligible){
         k_captation = 0;
@@ -262,23 +255,14 @@ void modification::penalization(sparse_vector *vect, int k, sparse_matrix &M_com
             k_captation += is_important_captor;
         }
     }
-    else { // we check that every target can be capted by k different captors
-        bool was_important_captor;
-        for (auto i = deleted_captor->begin(); i != deleted_captor->end(); ++i){
-            targ_captors = M_capt.mat[*i];
+    else {
+        for (int i = 1; i < M_capt.n; i++){
+            targ_captors = M_capt.mat[i];
             // we check that this delete captor has the adequate number of captors around it i.e. k
-            is_important_captor = ( intersection(targ_captors,*new_vect->vect).size() < k ) ;
-            was_important_captor = ( intersection(targ_captors,*vect->vect).size() < k-1 ) ;
-            for (auto j=targ_captors.begin(); j!=targ_captors.end();++j){
-                capt = intersection(M_capt.mat[*j],*new_vect->vect);
-                is_important_captor = is_important_captor or capt.size()< (k-(new_vect->vect->find(*j) != new_vect->vect->end()));
-                capt = intersection(M_capt.mat[*j],*vect->vect);
-                was_important_captor = was_important_captor or capt.size()< (k-(vect->vect->find(*j) != vect->vect->end()));
+            if (intersection(targ_captors,*new_vect->vect).size() < k - (new_vect->vect->find(i) != new_vect->vect->end())){
+                k_captation += k - (new_vect->vect->find(i) != new_vect->vect->end()) - intersection(targ_captors,*new_vect->vect).size();
             }
-            if (was_important_captor){
-                is_important_captor = false;
-            }
-            k_captation += is_important_captor;
+
         }
     }
 
@@ -316,15 +300,20 @@ void modification::penalization(sparse_vector *vect, int k, sparse_matrix &M_com
     }
 }
 
-sparse_vector* modification::apply_modification(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt){
+sparse_vector* modification::apply_modification(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt, double lambda_capt, double lambda_connexity){
     sparse_vector* new_vect = new sparse_vector(*vect);
-    new_vect->isEligible = check_modif(vect,k,M_comm,M_capt);
+
+    int k_capt = 0,connexity = 0;
+    penalization(vect,k,M_comm,M_capt,k_capt,connexity);
+
     for (auto i = deleted_captor->begin(); i != deleted_captor->end(); ++i){
         (new_vect)->delete_point(*i);
     }
     for (auto i = added_captor->begin(); i != added_captor->end(); ++i){
         (new_vect)->add_point(*i);
     }
+    new_vect->isEligible = (k_capt ==0) and (connexity==0);
+    new_vect->fitness = lambda_capt*k_capt + lambda_connexity*connexity + new_vect->vect->size() - 1;
     return new_vect;
 }
 

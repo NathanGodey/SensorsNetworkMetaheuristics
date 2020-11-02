@@ -1,4 +1,5 @@
 #include "evolutionary.h"
+#include "sparse.h"
 #include <cmath>
 #include <fstream>
 #include <algorithm>
@@ -22,7 +23,7 @@ Individual::Individual(const Individual &ind_original) : sparse_vector(ind_origi
 Individual::Individual(sparse_vector& v_original) : sparse_vector(v_original){
 }
 
-Individual Individual::cross(Individual& other, int avg_gene_size, int nb_targets, int id_child){
+Individual Individual::cross(Individual& other, int avg_gene_size, int nb_targets, int id_child, int K, sparse_matrix M_comm, sparse_matrix M_capt, double lambda_capt, double lambda_connexity){
 		int min_cut = 1+rand()%(nb_targets-1);
 		int max_cut = min_cut + int(avg_gene_size/2) + rand()%(int(avg_gene_size/2));
 		unordered_set<int> range, geneA, geneB;
@@ -32,7 +33,7 @@ Individual Individual::cross(Individual& other, int avg_gene_size, int nb_target
 		geneA = intersection(range, *vect);
 		geneB = intersection(range, *(other.vect));
 		modification cross_modif(geneA, geneB);
-		Individual* child = new Individual(*cross_modif.apply_modification(&other));
+        Individual* child = new Individual(*cross_modif.apply_modification(&other,K,M_comm,M_capt,lambda_capt,lambda_connexity));
 		child->id = id_child;
 		return *child;
 }
