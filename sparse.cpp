@@ -8,7 +8,6 @@ using namespace std;
 
 sparse_matrix::sparse_matrix(int size) {
     n = size;
-    mat.resize(size);
     unordered_set<int> empty;
     for (int i=0; i<size; i++) {
         mat.push_back(empty);
@@ -91,7 +90,7 @@ const unordered_set<int> intersection(unordered_set<int> a, unordered_set<int> b
 
 void sparse_matrix::fill_as_communication_graph(sparse_matrix &M_comm, sparse_vector *vect){
     for (auto itr = vect->vect->begin(); itr != vect->vect->end(); ++itr) {
-        mat[*itr] = intersection(M_comm.mat[*itr], *vect->vect);
+        mat.at(*itr) = intersection(M_comm.mat.at(*itr), *vect->vect);
     }
 }
 

@@ -129,3 +129,16 @@ void Individual::mutate(int mutation_size, int K, sparse_matrix &M_comm, sparse_
 		fitness = mutated->fitness;
 		vect = mutated->vect;
 }
+
+EvolutionnaryOptimizer::EvolutionnaryOptimizer(sparse_vector &elder, vector<Target>& _targets, double avg_insertions) {
+		targets = _targets;
+		population = *(new Population(init_size, elder, avg_insertions, lambda_capt, lambda_comm, targets.size()));
+}
+
+void EvolutionnaryOptimizer::run(int K, sparse_matrix &M_comm, sparse_matrix &M_capt, string file_name) {
+		for (int i_generation=0; i_generation<nb_max_generations; i_generation++){
+				population.write_to_file(file_name, targets, M_comm);
+				population.cross(reproduction_rate, avg_gene_size, K, M_comm, M_capt);
+				population.mutate(mutation_rate, mutation_size, K, M_comm, M_capt);
+		}
+}
