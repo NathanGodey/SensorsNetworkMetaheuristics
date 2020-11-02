@@ -96,7 +96,7 @@ void sparse_matrix::fill_as_captation_graph(sparse_matrix &M_capt, sparse_vector
     }
 }
 
-modification::modification(sparse_vector *vect, int nb_deletion, int nb_add, int &total_targets){
+modification::modification(sparse_vector *vect, int nb_deletion, int nb_add, int total_targets){
     int nb_del = min(nb_deletion, int(vect->vect->size()-1)); // there needs to be at least 0
     deleted_captor = new unordered_set<int>;
     added_captor = new unordered_set<int>;
@@ -231,6 +231,89 @@ bool modification::check_modif(sparse_vector *vect, int k, sparse_matrix &M_comm
         return false;
     }
     return true;
+}
+
+void modification::penalization(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt, int& k_captation, int& connexity){
+    // we verify that the modification is applicable to the vecteur (and we apply it)
+    sparse_vector* new_vect = new sparse_vector(*vect);
+    for (auto i = deleted_captor->begin(); i != deleted_captor->end(); ++i){
+        (*new_vect).delete_point(*i);
+    }
+    for (auto i = added_captor->begin(); i != added_captor->end(); ++i){
+        (*new_vect).add_point(*i);
+    }
+    sparse_matrix M_comm_activated(M_comm.n);
+    M_comm_activated.fill_as_communication_graph(M_comm, new_vect);
+
+    bool is_important_captor;
+
+    unordered_set<int> targ_captors,capt; // targ_captors will hold the list of captors for a target
+    if (vect->isEligible){
+        k_captation = 0;
+        // we verify that each target that was linked to deleted captors are capted by at least k captors
+        for (auto i = deleted_captor->begin(); i != deleted_captor->end(); ++i){
+            targ_captors = M_capt.mat[*i];
+            // we check that this delete captor has the adequate number of captors around it i.e. k
+            is_important_captor = ( intersection(targ_captors,*new_vect->vect).size() < k ) ;
+            for (auto j=targ_captors.begin(); j!=targ_captors.end();++j){
+                capt = intersection(M_capt.mat[*j],*new_vect->vect);
+                is_important_captor = is_important_captor or capt.size()< (k-(new_vect->vect->find(*j) != new_vect->vect->end()));
+            }
+            k_captation += is_important_captor;
+        }
+    }
+    else { // we check that every target can be capted by k different captors
+        bool was_important_captor;
+        for (auto i = deleted_captor->begin(); i != deleted_captor->end(); ++i){
+            targ_captors = M_capt.mat[*i];
+            // we check that this delete captor has the adequate number of captors around it i.e. k
+            is_important_captor = ( intersection(targ_captors,*new_vect->vect).size() < k ) ;
+            was_important_captor = ( intersection(targ_captors,*vect->vect).size() < k-1 ) ;
+            for (auto j=targ_captors.begin(); j!=targ_captors.end();++j){
+                capt = intersection(M_capt.mat[*j],*new_vect->vect);
+                is_important_captor = is_important_captor or capt.size()< (k-(new_vect->vect->find(*j) != new_vect->vect->end()));
+                capt = intersection(M_capt.mat[*j],*vect->vect);
+                was_important_captor = was_important_captor or capt.size()< (k-(vect->vect->find(*j) != vect->vect->end()));
+            }
+            if (was_important_captor){
+                is_important_captor = false;
+            }
+            k_captation += is_important_captor;
+        }
+    }
+
+    connexity = 0;
+
+    // we look at the connexity of the graph (if vect is not eligible or if the communication graph is not trivially non-connex)
+    unordered_set<int> visited = {0}, current;
+    bool keep_going = true;
+    vector<int> queue;
+    queue.push_back(0);
+    while (keep_going){
+        while (queue.size()>0) {
+            current = M_comm_activated.mat[*queue.begin()];
+            for (auto itr = current.begin(); itr != current.end(); ++itr) {
+                if (visited.find(*itr) == visited.end()) {
+                    queue.push_back(*itr);
+                    visited.insert(*itr);
+                }
+            }
+            queue.erase(queue.begin());
+        }
+        if (visited.size()<new_vect->vect->size()){
+            connexity += 1;
+            for (auto itr=new_vect->vect->begin();itr != new_vect->vect->end();++itr){
+                if (visited.find(*itr) == visited.end()){
+                    queue.push_back(*itr);
+                    visited.insert(*itr);
+                    break;
+                }
+            }
+        }
+        else{
+            keep_going = false;
+        }
+    }
 }
 
 sparse_vector* modification::apply_modification(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt){

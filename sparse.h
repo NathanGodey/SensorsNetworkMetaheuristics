@@ -42,11 +42,12 @@ public:
     unordered_set<int>* deleted_captor;
     unordered_set<int>* added_captor;
     modification();
-    modification(sparse_vector *vect, int nb_del, int nb_add, int &total_targets);
+    modification(sparse_vector *vect, int nb_del, int nb_add, int total_targets);
     modification(unordered_set<int> del_point, unordered_set<int> add_point);
     modification(int del_point);
     ~modification(){deleted_captor->clear(); added_captor->clear();}
     bool check_modif(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt);
+    void penalization(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt, int& k_captation, int& connexity);
     sparse_vector* apply_modification(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt);
     sparse_vector* apply_modification(sparse_vector *vect);
 };
@@ -58,3 +59,5 @@ void setSensorsFromVect(vector<Target> &targets, sparse_vector &v);
 void setNeighboorsFromCommunicationGraph(vector<Target> &targets, sparse_matrix &Com_graph);
 void create_communication_tree(sparse_matrix &M_result, sparse_matrix M_comm, sparse_vector vect);
 bool check_modification(sparse_matrix M_capt, sparse_matrix M_comm, sparse_vector vect_init, sparse_vector vect_fin);
+
+const unordered_set<int> intersection(unordered_set<int> a, unordered_set<int> b);
