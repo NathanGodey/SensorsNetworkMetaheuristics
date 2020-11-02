@@ -97,7 +97,19 @@ void Population::write_to_file(string file_name, vector<Target>& targets, sparse
 		file.close();
 }
 
-
+void Population::natural_select(double kill_rate){
+    int N = kill_rate*size;
+    sort(individuals->begin(), individuals->end());
+    vector<int> sorted_individuals_ids;
+    for (auto it = individuals->begin(); it != individuals->end(); ++it) {
+        sorted_individuals_ids.push_back(it->id);
+    }
+    sort(individuals->begin(), individuals->end(), cmpId_ind);
+    for (int i=0;i<N;i++){
+        individuals->pop_back();
+    }
+    size -= N;
+}
 
 void Population::cross(double reproduction_rate, int avg_gene_size, int K, sparse_matrix &M_comm, sparse_matrix &M_capt) {
 		int nb_cross = int(reproduction_rate*size);

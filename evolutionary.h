@@ -16,6 +16,7 @@ public:
 
 
 inline bool operator< (Individual& l, Individual& r){ return r.fitness > l.fitness; };
+inline bool cmpId_ind(Individual& l, Individual& r){ return r.id > l.id; };
 
 class Population {
 public:
