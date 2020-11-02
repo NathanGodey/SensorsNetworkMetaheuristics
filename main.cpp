@@ -15,12 +15,12 @@
 
 using namespace std;
 
-vector<string> file_name = {"150_7_4", "225_8_10", "625_12_100", "900_15_20", "1500_15_100", "1500_18_100"};
-vector<vector<int>> R_ = {{1,1},{2,2}};
+vector<string> file_name = {"150_7_4"};
+vector<vector<int>> R_ = {{1,1}};
 vector<int> K_={1};
 
 
-int main_before(){
+int main(){
   ofstream csv_results;
   csv_results.open("results.csv");
   csv_results <<"Instance, K, R_comm, R_capt, SensorsLeft, LowerBound" <<endl;
@@ -56,10 +56,10 @@ int main_before(){
               setSensorsFromVect(targets, *v);
               setNeighboorsFromCommunicationGraph(targets, Com_graph);
 
-              Population p(200, *v, 0.1, 1,1, targets.size());
-              p.cross(0.5, 10, K, M_comm, M_capt);
-              p.compute_metrics();
-              cout << p.avg_fitness;
+              EvolutionnaryOptimizer opt(*v, targets, 0.05);
+              opt.nb_max_generations = 10;
+              opt.run(K, M_comm, M_capt, "result_evol.txt");
+
               writeToTxt(targets,instance, K, R_COMM, R_CAPT);
 
               system("python visualizer.py");
@@ -70,36 +70,4 @@ int main_before(){
   }
 
   return 0;
-}
-
-int main(){
-    vector<Target> targets;
-    string parserPrefix = "./instances/", instancePrefix = "captANOR", extension = ".dat";
-    Parser *parser = new Parser(parserPrefix+instancePrefix+file_name[0]+extension, targets);
-    int R_COMM = 1, R_CAPT = 1, K=1;
-
-    sparse_matrix M_comm(targets, R_COMM);
-    sparse_matrix M_capt(targets, R_CAPT);
-
-    setTargetsWeights(targets, M_capt);
-    sparse_vector* v = new sparse_vector();
-    create_solution(v, targets,R_CAPT,K);
-
-
-    vector<int> removal_queue = sortedTargetsIds(targets);
-    v = greedyOptimization(v, removal_queue, K, M_comm, M_capt);
-
-    sparse_matrix Com_graph(targets.size());
-    Com_graph.fill_as_communication_graph(M_comm, v);
-    setSensorsFromVect(targets, *v);
-    setNeighboorsFromCommunicationGraph(targets, Com_graph);
-
-    Population p(200, *v, 0.1, 1,1, targets.size());
-    p.cross(0.5, 10, K, M_comm, M_capt);
-    p.compute_metrics();
-    cout << "avant natural_select" << p.size << "," <<  p.individuals->size() << "     fitness moy " << p.avg_fitness << endl;
-
-    p.natural_select(0.2);
-    p.compute_metrics();
-    cout <<"apres" << p.size << "," <<  p.individuals->size() << "     fitness moy " << p.avg_fitness <<endl;
 }
