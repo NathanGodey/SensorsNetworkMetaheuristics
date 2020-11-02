@@ -16,8 +16,8 @@
 using namespace std;
 
 vector<string> file_name = {"150_7_4", "225_8_10", "625_12_100", "900_15_20", "1500_15_100", "1500_18_100"};
-vector<vector<int>> R_ = {{1,1},{2,1},{2,2},{3,2}};
-vector<int> K_={1,2,3};
+vector<vector<int>> R_ = {{1,1},{2,2}};
+vector<int> K_={1};
 
 
 int main(){
@@ -44,9 +44,12 @@ int main(){
               sparse_matrix M_capt(targets, R_CAPT);
 
               setTargetsWeights(targets, M_capt);
-
-              sparse_vector* v = new sparse_vector();
-              create_solution(v, targets,R_CAPT,K);
+              unordered_set<int> a;
+              for (int i=0; i<targets.size();i++) {
+                  a.insert(i);
+              }
+              sparse_vector* v = new sparse_vector(a);
+              //create_solution(v, targets,R_CAPT,K);
 
 
               vector<int> removal_queue = sortedTargetsIds(targets);

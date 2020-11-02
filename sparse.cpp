@@ -174,24 +174,20 @@ bool modification::check_modif(sparse_vector *vect, int k, sparse_matrix &M_comm
             (*new_vect).add_point(*i);
         }
     }
+
     sparse_matrix M_comm_activated(M_comm.n);
     M_comm_activated.fill_as_communication_graph(M_comm, new_vect);
 
-    unordered_set<int> targ,targ_captors,capt; // targ_captors will hold the list of captors for a target
-    for (auto it=new_vect->vect->begin();it !=new_vect->vect->end();++it){
-        targ.insert(*it); // targ is the list of checked target, we don't need to check for captors
-    }
+    unordered_set<int> targ_captors,capt; // targ_captors will hold the list of captors for a target
     if (vect->isEligible){
         // we verify that each target that was linked to deleted captors are capted by at least k captors
         for (auto i = deleted_captor->begin(); i != deleted_captor->end(); ++i){
             targ_captors = M_capt.mat[*i];
             // the deleted captor needs to have k captors around it as well
             for (auto j=targ_captors.begin(); j!=targ_captors.end();++j){
-                if (targ.find(*j) == targ.end()){
-                    capt = intersection(M_capt.mat[*j],*new_vect->vect);
-                    if (capt.size()<k){
-                        return false;
-                    }
+                capt = intersection(M_capt.mat[*j],*new_vect->vect);
+                if (capt.size()<(k-(new_vect->vect->find(*j) != new_vect->vect->end()))){
+                    return false;
                 }
             }
         }
@@ -208,10 +204,10 @@ bool modification::check_modif(sparse_vector *vect, int k, sparse_matrix &M_comm
         }
 
     }
-    else { // we check that every target is can be capted by k different captors
+    else { // we check that every target can be capted by k different captors
         for (int i=1; i<M_capt.n; i++) {
             capt = intersection(M_capt.mat[i],*new_vect->vect);
-            if (capt.size()<(k-(vect->vect->find(i) != vect->vect->end()))) {
+            if (capt.size()<(k-(new_vect->vect->find(i) != new_vect->vect->end()))) {
                 return false;
             }
         }
@@ -309,6 +305,7 @@ void create_solution(sparse_vector *captors, vector<Target> targets, double R_ca
         }
     }
 }
+
 
 bool is_eligible(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matrix &M_capt) {
     sparse_matrix M_comm_activated(M_comm.n);
