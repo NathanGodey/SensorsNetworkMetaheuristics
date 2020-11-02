@@ -56,12 +56,10 @@ int main(){
               setSensorsFromVect(targets, *v);
               setNeighboorsFromCommunicationGraph(targets, Com_graph);
 
-              Population p(200, *v, 0.1, 1,1, targets.size());
-              Individual ind = p.individuals->at(0);
-              // p.cross(0.5, 10, K, M_comm, M_capt);
-              // p.compute_metrics();
-              // cout << p.avg_fitness;
-              
+              EvolutionnaryOptimizer opt(*v, targets, 0.05);
+              opt.nb_max_generations = 10;
+              opt.run(K, M_comm, M_capt, "result_evol.txt");
+
               writeToTxt(targets,instance, K, R_COMM, R_CAPT);
 
               system("python visualizer.py");

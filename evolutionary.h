@@ -28,6 +28,7 @@ public:
 		int nb_targets;
 		double lambda_capt;
 		double lambda_comm;
+		Population() {};
 		Population(int init_size, sparse_vector &elder, double avg_insertions, double lambda_capt, double lambda_comm, int nb_targets);
 		void compute_metrics();
 		void cross(double reproduction_rate, int avg_gene_size, int K, sparse_matrix &M_comm, sparse_matrix &M_capt);
@@ -40,17 +41,18 @@ public:
 class EvolutionnaryOptimizer {
 public:
 		Population population;
-		int nb_max_generations;
-		int init_size;
-		double mutation_rate;
-		int mutation_size;
-		double reproduction_rate;
-		double kill_rate;
-		double lambda_capt;
-		double lambda_comm;
-		int avg_gene_size;
-		EvolutionnaryOptimizer(int nb_max_generations,int init_size,double mutation_rate,double reproduction_rate, double kill_rate, double avg_insertions, int avg_gene_size);
-		void run(string file_name);
+		int nb_max_generations=1;
+		int init_size=100;
+		double mutation_rate=0.05;
+		int mutation_size=3;
+		double reproduction_rate=0.05;
+		double kill_rate=0.05;
+		double lambda_capt=1.5;
+		double lambda_comm=1.5;
+		int avg_gene_size=5;
+		vector<Target> targets;
+		EvolutionnaryOptimizer(sparse_vector &elder, vector<Target>& targets, double avg_insertions);
+		void run(int K, sparse_matrix &M_comm, sparse_matrix &M_capt, string file_name);
 		vector<Individual> get_top_n(int n);
 		Individual get_best();
 };
