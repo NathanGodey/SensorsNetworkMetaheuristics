@@ -284,9 +284,19 @@ void create_solution(sparse_vector *captors, vector<Target> targets, double R_ca
             queue.erase(queue.begin());
         }
 
-        for (int e=0; e<edges_e.size();e++){
-            if (captors->vect->find(edges_e[e]) == captors->vect->end()){
-                M.delete_edge(edges_b[e],edges_e[e]);
+        if (it == 0 and k!=1){
+            for (int e=0; e<edges_e.size();e++){
+                if (edges_b[e] !=0){
+                    M.delete_edge(edges_b[e],edges_e[e]);
+                }
+            }
+        }
+
+        if (it == 1 and k!=2){
+            for (int e=0; e<edges_e.size();e++){
+                if (edges_b[e] !=0 and captors->vect->find(edges_e[e]) == captors->vect->end()){
+                    M.delete_edge(edges_b[e],edges_e[e]);
+                }
             }
         }
 
