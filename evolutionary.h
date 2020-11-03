@@ -8,7 +8,6 @@ class Individual: public sparse_vector {
 public:
 		int id;
 		Individual(int id, sparse_vector &elder, double avg_insertions, int nb_targets, double lambda_capt, double lambda_comm);
-		Individual(const Individual &ind_original);
 		Individual(sparse_vector& v_original);
 		Individual();
     Individual cross(Individual& other, int avg_gene_size, int id_child, int K, sparse_matrix M_comm, sparse_matrix M_capt); // Cross-over operation
@@ -21,7 +20,7 @@ inline bool operator< (const Individual& l, const Individual& r){ return r.fitne
 class Population {
 public:
 		vector<Individual>* individuals;
-		int size;
+		int init_size;
 		double best_fitness;
 		double avg_fitness;
 		int best_id;
@@ -44,9 +43,9 @@ public:
 		int nb_max_generations=1;
 		int init_size=100;
 		double mutation_rate=0.05;
-		int mutation_size=3;
-		double reproduction_rate=0.05;
-		double kill_rate=0.05;
+		int mutation_size=5;
+		double reproduction_rate=0.2;
+		double kill_rate=0.2;
 		double lambda_capt=1.5;
 		double lambda_comm=1.5;
 		int avg_gene_size=5;

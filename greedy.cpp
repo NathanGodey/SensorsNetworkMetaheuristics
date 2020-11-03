@@ -29,7 +29,7 @@ sparse_vector* greedyOptimization(sparse_vector *v, vector<int> &removal_queue, 
 				if (removing_point->check_modif(v, K, M_comm, M_capt) && current!=0){
 						v = removing_point->apply_modification(v);
 				}
-				cout <<'\r' <<"Sensors left : " <<v->vect->size()-1 <<"  ";
+				cout <<'\r' <<"Sensors left : " <<v->vect.size()-1 <<"  ";
 				fflush(stdout);
 		}
 		cout <<endl <<"Greedy Optimization completed." <<endl;
