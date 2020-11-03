@@ -15,7 +15,7 @@
 
 using namespace std;
 
-vector<string> file_name = {"150_7_4"};
+vector<string> file_name = {"625_12_100"};
 vector<vector<int>> R_ = {{1,1}};
 vector<int> K_={1};
 
@@ -24,6 +24,11 @@ int main(){
   ofstream csv_results;
   csv_results.open("results.csv");
   csv_results <<"Instance, K, R_comm, R_capt, SensorsLeft, LowerBound" <<endl;
+
+  std::ofstream ofs;
+  ofs.open("result_evol.txt", std::ofstream::out | std::ofstream::trunc);
+  ofs.close();
+
   for (auto instance: file_name) {
       vector<Target> targets;
       string parserPrefix = "./instances/", instancePrefix = "captANOR", extension = ".dat";
@@ -56,14 +61,16 @@ int main(){
               setSensorsFromVect(targets, *v);
               setNeighboorsFromCommunicationGraph(targets, Com_graph);
 
-              EvolutionnaryOptimizer opt(*v, targets, 0.05);
-              opt.nb_max_generations = 10;
+              EvolutionnaryOptimizer opt(*v, targets, 0.5);
+              opt.nb_max_generations = 30;
+              opt.init_size = 300;
+              opt.mutation_rate = 0.01;
               opt.run(K, M_comm, M_capt, "result_evol.txt");
 
               writeToTxt(targets,instance, K, R_COMM, R_CAPT);
 
-              system("python visualizer.py");
-              csv_results <<instance <<", " <<K <<", " <<R_COMM <<", " <<R_CAPT <<", " <<v->vect->size()-1<<", "<<lower_bound <<endl;
+              //system("python visualizer.py");
+              csv_results <<instance <<", " <<K <<", " <<R_COMM <<", " <<R_CAPT <<", " <<v->vect.size()-1<<", "<<lower_bound <<endl;
               clear_all(targets);
           }
       }

@@ -10,16 +10,16 @@ using namespace std;
 class sparse_vector
 {
 public:
-    std::unordered_set<int>* vect;
+    std::unordered_set<int> vect;
     bool isEligible;
     double fitness = INF;
     double lambda_capt;
     double lambda_comm;
     void display();
-    sparse_vector(){vect = new std::unordered_set<int>;}
-    sparse_vector(std::unordered_set<int> &V){vect = new std::unordered_set<int>(V);}
+    sparse_vector(){vect = {};}
+    sparse_vector(std::unordered_set<int> &V){vect = V;}
     sparse_vector(const sparse_vector &v_original);
-    ~sparse_vector(){vect->clear();}
+    ~sparse_vector(){vect.clear();}
     void add_point(int point);
     void delete_point(int point);
 };

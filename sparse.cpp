@@ -57,21 +57,21 @@ void sparse_matrix::display(){
 }
 
 void sparse_vector::add_point(int point){
-    vect->insert(point);
+    vect.insert(point);
 }
 
 void sparse_vector::delete_point(int point){
-    vect->erase(point);
+    vect.erase(point);
 }
 
 void sparse_vector::display() {
-    for (auto itr = vect->begin(); itr!=vect->end(); itr++){
+    for (auto itr = vect.begin(); itr!=vect.end(); itr++){
         cout <<*itr <<" ";
     }
     cout <<endl;
 }
 sparse_vector::sparse_vector(const sparse_vector &v_original) {
-    vect = new unordered_set<int>(*v_original.vect);
+    vect = v_original.vect;
     isEligible = v_original.isEligible;
     fitness = v_original.fitness;
     lambda_capt = v_original.lambda_capt;
@@ -89,41 +89,47 @@ const unordered_set<int> intersection(unordered_set<int> a, unordered_set<int> b
 }
 
 void sparse_matrix::fill_as_communication_graph(sparse_matrix &M_comm, sparse_vector *vect){
-    for (auto itr = vect->vect->begin(); itr != vect->vect->end(); ++itr) {
-        mat.at(*itr) = intersection(M_comm.mat.at(*itr), *vect->vect);
+    for (auto itr = vect->vect.begin(); itr != vect->vect.end(); ++itr) {
+        mat.at(*itr) = intersection(M_comm.mat.at(*itr), vect->vect);
     }
 }
 
 void sparse_matrix::fill_as_captation_graph(sparse_matrix &M_capt, sparse_vector *vect){
     for (int i=0; i<M_capt.n; i++) {
-        mat[i] = intersection(M_capt.mat[i], *vect->vect);
-        if (vect->vect->find(i)!=vect->vect->end()) {
+        mat[i] = intersection(M_capt.mat[i], vect->vect);
+        if (vect->vect.find(i)!=vect->vect.end()) {
             mat[i].insert(i);
         }
     }
 }
 
 modification::modification(sparse_vector *vect, int nb_deletion, int nb_add, int total_targets){
-    int nb_del = min(nb_deletion, int(vect->vect->size()-1)); // there needs to be at least 0
+    if (vect->vect.size()==0) {
+        cout <<"Trying to modify empty vector." <<endl;
+        deleted_captor = new unordered_set<int>;
+        added_captor = new unordered_set<int>;
+        return;
+    }
+    int nb_del = min(nb_deletion, int(vect->vect.size()-1)); // there needs to be at least 0
     deleted_captor = new unordered_set<int>;
     added_captor = new unordered_set<int>;
     int r;
     while (added_captor->size()<nb_add){
         r = rand()%total_targets;
-        if (vect->vect->find(r)==vect->vect->end() and added_captor->find(r)==added_captor->end()){
+        if (vect->vect.find(r)==vect->vect.end() and added_captor->find(r)==added_captor->end()){
             added_captor->insert(r);
         }
     }
     while (deleted_captor->size()<nb_del){
         // taken from https://www.tfzx.net/article/2821385.html
         // randomly selects an item from vect->vect with uniform distribution?
-        auto b_count =vect->vect->bucket_count();
+        auto b_count =vect->vect.bucket_count();
         auto b_idx = rand() % b_count;
         size_t b_size = 0;
 
         for (int i = 0; i < b_count; ++i)
         {
-            b_size = vect->vect->bucket_size(b_idx);
+            b_size = vect->vect.bucket_size(b_idx);
             if (b_size > 0)
                 break;
 
@@ -132,7 +138,7 @@ modification::modification(sparse_vector *vect, int nb_deletion, int nb_add, int
 
         auto idx = rand() % b_size;
 
-        auto it = vect->vect->cbegin(b_idx);
+        auto it = vect->vect.cbegin(b_idx);
 
         for (int i = 0; i < idx; ++i)
         {
@@ -182,8 +188,8 @@ bool modification::check_modif(sparse_vector *vect, int k, sparse_matrix &M_comm
             targ_captors = M_capt.mat[*i];
             // the deleted captor needs to have k captors around it as well
             for (auto j=targ_captors.begin(); j!=targ_captors.end();++j){
-                capt = intersection(M_capt.mat[*j],*new_vect->vect);
-                if (capt.size()<(k-(new_vect->vect->find(*j) != new_vect->vect->end()))){
+                capt = intersection(M_capt.mat[*j],new_vect->vect);
+                if (capt.size()<(k-(new_vect->vect.find(*j) != new_vect->vect.end()))){
                     return false;
                 }
             }
@@ -192,9 +198,9 @@ bool modification::check_modif(sparse_vector *vect, int k, sparse_matrix &M_comm
         // we first quickly check that no captor is isolated (otherwise it is going to be done with the code below)
         unordered_set<int> neighboring_captors, checked_captors;
         for (auto i = deleted_captor->begin(); i != deleted_captor->end(); ++i){
-            neighboring_captors = intersection(*(*new_vect).vect,M_comm_activated.mat[*i]);
+            neighboring_captors = intersection(new_vect->vect,M_comm_activated.mat[*i]);
             for (auto j = neighboring_captors.begin(); j != neighboring_captors.end(); ++j){
-                if (intersection(*(*new_vect).vect,M_comm_activated.mat[*j]).size() == 0){
+                if (intersection(new_vect->vect,M_comm_activated.mat[*j]).size() == 0){
                     return false;
                 }
             }
@@ -203,8 +209,8 @@ bool modification::check_modif(sparse_vector *vect, int k, sparse_matrix &M_comm
     }
     else { // we check that every target can be capted by k different captors
         for (int i=1; i<M_capt.n; i++) {
-            capt = intersection(M_capt.mat[i],*new_vect->vect);
-            if (capt.size()<(k-(new_vect->vect->find(i) != new_vect->vect->end()))) {
+            capt = intersection(M_capt.mat[i],new_vect->vect);
+            if (capt.size()<(k-(new_vect->vect.find(i) != new_vect->vect.end()))) {
                 return false;
             }
         }
@@ -224,7 +230,7 @@ bool modification::check_modif(sparse_vector *vect, int k, sparse_matrix &M_comm
         }
         queue.erase(queue.begin());
     }
-    if (visited.size()<new_vect->vect->size()){
+    if (visited.size()<new_vect->vect.size()){
         return false;
     }
     return true;
@@ -254,10 +260,10 @@ void modification::penalization(sparse_vector *vect, int k, sparse_matrix &M_com
         for (auto i = deleted_captor->begin(); i != deleted_captor->end(); ++i){
             targ_captors = M_capt.mat[*i];
             // we check that this delete captor has the adequate number of captors around it i.e. k
-            is_important_captor = ( intersection(targ_captors,*new_vect->vect).size() < k ) ;
+            is_important_captor = ( intersection(targ_captors,new_vect->vect).size() < k ) ;
             for (auto j=targ_captors.begin(); j!=targ_captors.end();++j){
-                capt = intersection(M_capt.mat[*j],*new_vect->vect);
-                is_important_captor = is_important_captor or capt.size()< (k-(new_vect->vect->find(*j) != new_vect->vect->end()));
+                capt = intersection(M_capt.mat[*j],new_vect->vect);
+                is_important_captor = is_important_captor or capt.size()< (k-(new_vect->vect.find(*j) != new_vect->vect.end()));
             }
             k_captation += is_important_captor;
         }
@@ -266,8 +272,8 @@ void modification::penalization(sparse_vector *vect, int k, sparse_matrix &M_com
         for (int i = 1; i < M_capt.n; i++){
             targ_captors = M_capt.mat[i];
             // we check that this delete captor has the adequate number of captors around it i.e. k
-            if (intersection(targ_captors,*new_vect->vect).size() < k - (new_vect->vect->find(i) != new_vect->vect->end())){
-                k_captation += k - (new_vect->vect->find(i) != new_vect->vect->end()) - intersection(targ_captors,*new_vect->vect).size();
+            if (intersection(targ_captors,new_vect->vect).size() < k - (new_vect->vect.find(i) != new_vect->vect.end())){
+                k_captation += k - (new_vect->vect.find(i) != new_vect->vect.end()) - intersection(targ_captors,new_vect->vect).size();
             }
 
         }
@@ -291,9 +297,9 @@ void modification::penalization(sparse_vector *vect, int k, sparse_matrix &M_com
             }
             queue.erase(queue.begin());
         }
-        if (visited.size()<new_vect->vect->size()){
+        if (visited.size()<new_vect->vect.size()){
             connexity += 1;
-            for (auto itr=new_vect->vect->begin();itr != new_vect->vect->end();++itr){
+            for (auto itr=new_vect->vect.begin();itr != new_vect->vect.end();++itr){
                 if (visited.find(*itr) == visited.end()){
                     queue.push_back(*itr);
                     visited.insert(*itr);
@@ -320,7 +326,7 @@ sparse_vector* modification::apply_modification(sparse_vector *vect, int k, spar
         (new_vect)->add_point(*i);
     }
     new_vect->isEligible = (k_capt ==0) and (connexity==0);
-    new_vect->fitness = vect->lambda_capt*k_capt + vect->lambda_comm*connexity + new_vect->vect->size() - 1;
+    new_vect->fitness = vect->lambda_capt*k_capt + vect->lambda_comm*connexity + new_vect->vect.size() - 1;
     return new_vect;
 }
 
@@ -369,7 +375,7 @@ void create_solution(sparse_vector *captors, vector<Target> targets, double R_ca
 
         if (it == 1 and k!=2){
             for (int e=0; e<edges_e.size();e++){
-                if (edges_b[e] !=0 and captors->vect->find(edges_e[e]) == captors->vect->end()){
+                if (edges_b[e] !=0 and captors->vect.find(edges_e[e]) == captors->vect.end()){
                     M.delete_edge(edges_b[e],edges_e[e]);
                 }
             }
@@ -403,14 +409,14 @@ bool is_eligible(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matri
         }
         queue.erase(queue.begin());
     }
-    if (visited.size()<vect->vect->size()){
+    if (visited.size()<vect->vect.size()){
         vect->isEligible = false;
         return false;
     }
     sparse_matrix M_capt_activated(M_capt.n);
     M_capt_activated.fill_as_captation_graph(M_capt, vect);
     for (int i=1; i<M_capt.n; i++) {
-        if (M_capt_activated.mat[i].size() < (k-(vect->vect->find(i) != vect->vect->end()))) {
+        if (M_capt_activated.mat[i].size() < (k-(vect->vect.find(i) != vect->vect.end()))) {
             vect->isEligible = false;
             return false;
         }
@@ -421,7 +427,7 @@ bool is_eligible(sparse_vector *vect, int k, sparse_matrix &M_comm, sparse_matri
 
 
 void setSensorsFromVect(vector<Target> &targets, sparse_vector &v) {
-		for (auto itr = v.vect->begin(); itr != v.vect->end(); itr++){
+		for (auto itr = v.vect.begin(); itr != v.vect.end(); itr++){
 				targets[*itr].isSensor = true;
 		}
 };
